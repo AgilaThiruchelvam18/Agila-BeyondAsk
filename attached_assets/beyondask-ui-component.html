@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <script>
+      (function() {
+        const originalConsole = window.console;
+        window.console = {
+          log: (...args) => {
+            originalConsole.log(...args);
+            window.parent.postMessage({ type: 'console', message: args.join(' ') }, '*');
+          },
+          error: (...args) => {
+            originalConsole.error(...args);
+            window.parent.postMessage({ type: 'console', message: 'Error: ' + args.join(' ') }, '*');
+          },
+          warn: (...args) => {
+            originalConsole.warn(...args);
+            window.parent.postMessage({ type: 'console', message: 'Warning: ' + args.join(' ') }, '*');
+          }
+        };
+
+        window.addEventListener('error', (event) => {
+          window.parent.postMessage({ type: 'console', message: 'Uncaught Error: ' + event.message }, '*');
+        });
+      })();
+    </script>
+  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BeyondAsk - UI Components</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #6D6AFF;
+      --color-primary-dark: #5957cc;
+      --color-primary-light: #8b89ff;
+      --color-secondary: #FF4BCB;
+      --color-accent: #00C2FF;
+      --color-highlight: #FFB800;
+      --color-success: #10B981;
+      --color-warning: #FBBF24;
+      --color-error: #EF4444;
+      --color-background: #F8F9FE;
+      --color-surface-light: #FFFFFF;
+      --color-surface-medium: #F0F2FA;
+      --color-text-primary: #2C2C4A;
+      --color-text-secondary: #6E7191;
+      --color-border: #E5E7EB;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--color-background);
+      color: var(--color-text-primary);
+    }
+    
+    .bg-primary { background-color: var(--color-primary); }
+    .bg-primary-dark { background-color: var(--color-primary-dark); }
+    .bg-primary-light { background-color: var(--color-primary-light); }
+    .bg-secondary { background-color: var(--color-secondary); }
+    .bg-accent { background-color: var(--color-accent); }
+    .bg-highlight { background-color: var(--color-highlight); }
+    .bg-success { background-color: var(--color-success); }
+    .bg-warning { background-color: var(--color-warning); }
+    .bg-error { background-color: var(--color-error); }
+    .bg-surface-light { background-color: var(--color-surface-light); }
+    .bg-surface-medium { background-color: var(--color-surface-medium); }
+    
+    .text-primary-color { color: var(--color-primary); }
+    .text-secondary-color { color: var(--color-secondary); }
+    .text-accent-color { color: var(--color-accent); }
+    .text-highlight-color { color: var(--color-highlight); }
+    .text-text-secondary { color: var(--color-text-secondary); }
+    .text-success { color: var(--color-success); }
+    .text-warning { color: var(--color-warning); }
+    .text-error { color: var(--color-error); }
+    
+    .border-primary { border-color: var(--color-primary); }
+    .border-secondary { border-color: var(--color-secondary); }
+    
+    /* Card Styles */
+    .card {
+      background-color: var(--color-surface-light);
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+    }
+    
+    /* Button Styles */
+    .btn {
+      font-weight: 500;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+      background-color: var(--color-primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--color-primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-secondary {
+      background-color: var(--color-secondary);
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #e43bb6;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--color-primary);
+      color: var(--color-primary);
+    }
+    
+    .btn-outline:hover {
+      background-color: var(--color-primary);
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    .btn-text {
+      background-color: transparent;
+      color: var(--color-primary);
+    }
+    
+    .btn-text:hover {
+      background-color: rgba(109, 106, 255, 0.05);
+      transform: translateY(-2px);
+    }
+    
+    .btn-success {
+      background-color: var(--color-success);
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background-color: #0da271;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-warning {
+      background-color: var(--color-warning);
+      color: white;
+    }
+    
+    .btn-warning:hover {
+      background-color: #f5a623;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-error {
+      background-color: var(--color-error);
+      color: white;
+    }
+    
+    .btn-error:hover {
+      background-color: #dc2626;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-sm {
+      font-size: 0.875rem;
+      padding: 0.25rem 0.75rem;
+    }
+    
+    .btn-lg {
+      font-size: 1.125rem;
+      padding: 0.75rem 1.5rem;
+    }
+    
+    /* Form Styles */
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 0.5rem;
+      background-color: var(--color-surface-light);
+      color: var(--color-text-primary);
+      transition: all 0.3s ease;
+    }
+    
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(109, 106, 255, 0.2);
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--color-text-primary);
+      font-weight: 500;
+    }
+    
+    .form-hint {
+      margin-top: 0.25rem;
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+    
+    .form-error {
+      margin-top: 0.25rem;
+      font-size: 0.875rem;
+      color: var(--color-error);
+    }
+    
+    .checkbox {
+      width: 1rem;
+      height: 1rem;
+      border-radius: 0.25rem;
+      border: 1px solid var(--color-border);
+      accent-color: var(--color-primary);
+    }
+    
+    .radio {
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+      border: 1px solid var(--color-border);
+      accent-color: var(--color-primary);
+    }
+    
+    /* Toggle Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 24px;
+    }
+    
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--color-border);
+      transition: .4s;
+      border-radius: 34px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: var(--color-primary);
+    }
+    
+    input:focus + .slider {
+      box-shadow: 0 0 1px var(--color-primary);
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+    
+    /* Badge Styles */
+    .badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .badge-primary {
+      background-color: rgba(109, 106, 255, 0.1);
+      color: var(--color-primary);
+    }
+    
+    .badge-secondary {
+      background-color: rgba(255, 75, 203, 0.1);
+      color: var(--color-secondary);
+    }
+    
+    .badge-success {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--color-success);
+    }
+    
+    .badge-warning {
+      background-color: rgba(251, 191, 36, 0.1);
+      color: var(--color-warning);
+    }
+    
+    .badge-error {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: var(--color-error);
+    }
+    
+    /* Alert Styles */
+    .alert {
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: flex-start;
+    }
+    
+    .alert-info {
+      background-color: rgba(109, 106, 255, 0.1);
+      border-left: 4px solid var(--color-primary);
+    }
+    
+    .alert-success {
+      background-color: rgba(16, 185, 129, 0.1);
+      border-left: 4px solid var(--color-success);
+    }
+    
+    .alert-warning {
+      background-color: rgba(251, 191, 36, 0.1);
+      border-left: 4px solid var(--color-warning);
+    }
+    
+    .alert-error {
+      background-color: rgba(239, 68, 68, 0.1);
+      border-left: 4px solid var(--color-error);
+    }
+    
+    /* Table Styles */
+    .table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    
+    .table th {
+      background-color: var(--color-surface-medium);
+      font-weight: 600;
+      text-align: left;
+      padding: 0.75rem 1rem;
+      color: var(--color-text-primary);
+    }
+    
+    .table th:first-child {
+      border-top-left-radius: 0.5rem;
+    }
+    
+    .table th:last-child {
+      border-top-right-radius: 0.5rem;
+    }
+    
+    .table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+    
+    .table-row {
+      transition: all 0.2s ease;
+    }
+    
+    .table-row:hover {
+      background-color: rgba(240, 242, 250, 0.5);
+    }
+    
+    /* Tab Styles */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--color-border);
+    }
+    
+    .tab {
+      padding: 0.75rem 1rem;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-bottom: 2px solid transparent;
+    }
+    
+    .tab:hover {
+      color: var(--color-primary);
+    }
+    
+    .tab-active {
+      color: var(--color-primary);
+      border-bottom: 2px solid var(--color-primary);
+    }
+    
+    /* Typography */
+    .text-xs { font-size: 0.75rem; }
+    .text-sm { font-size: 0.875rem; }
+    .text-md { font-size: 1rem; }
+    .text-lg { font-size: 1.125rem; }
+    .text-xl { font-size: 1.25rem; }
+    .text-2xl { font-size: 1.5rem; }
+    .text-3xl { font-size: 1.875rem; }
+    .text-4xl { font-size: 2.25rem; }
+    
+    .font-light { font-weight: 300; }
+    .font-normal { font-weight: 400; }
+    .font-medium { font-weight: 500; }
+    .font-semibold { font-weight: 600; }
+    .font-bold { font-weight: 700; }
+    .font-extrabold { font-weight: 800; }
+    
+    .leading-none { line-height: 1; }
+    .leading-tight { line-height: 1.25; }
+    .leading-normal { line-height: 1.5; }
+    .leading-relaxed { line-height: 1.75; }
+    .leading-loose { line-height: 2; }
+    
+    /* Section Styles */
+    .section {
+      margin-bottom: 2rem;
+    }
+    
+    .section-header {
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+    
+    /* Component Demo Block */
+    .demo-block {
+      padding: 1.5rem;
+      border: 1px dashed var(--color-border);
+      border-radius: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="min-h-screen">
+    <!-- Header -->
+    <header class="bg-surface-light border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center">
+            <!-- Logo -->
+            <svg class="w-8 h-8" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="40" height="40" rx="8" fill="url(#paint0_linear)"></rect>
+              <path d="M12 20C12 13.9249 16.9249 9 23 9V31C16.9249 31 12 26.0751 12 20Z" fill="white"></path>
+              <path d="M24 15H28C29.6569 15 31 16.3431 31 18V22C31 23.6569 29.6569 25 28 25H24V15Z" fill="white"></path>
+              <defs>
+                <linearGradient id="paint0_linear" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#6D6AFF"></stop>
+                  <stop offset="1" stop-color="#FF4BCB"></stop>
+                </linearGradient>
+              </defs>
+            </svg>
+            <span class="ml-2 text-lg font-semibold">Beyond<span class="text-secondary-color">Ask</span></span>
+          </div>
+          <div>
+            <h1 class="text-xl font-semibold">UI Components</h1>
+          </div>
+          <div>
+            <button class="btn btn-primary">Back to Dashboard</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <!-- Intro -->
+      <div class="mb-12">
+        <h1 class="text-3xl font-bold mb-2">BeyondAsk UI Components</h1>
+        <p class="text-text-secondary max-w-3xl">This page provides a comprehensive overview of the UI components used in the BeyondAsk interface. Use these components to maintain consistency across the platform.</p>
+      </div>
+      
+      <!-- Typography Section -->
+      <section class="section" id="typography">
+        <div class="section-header">
+          <h2 class="text-2xl font-semibold">Typography</h2>
+        </div>
+        
+        <div class="card p-6">
+          <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-4">Headings</h3>
+            <div class="space-y-4">
+              <div>
+                <h1 class="text-4xl font-bold">Heading 1 (text-4xl)</h1>
+                <p class="text-text-secondary mt-1">Used for main page headings</p>
+              </div>
+              <div>
+                <h2 class="text-3xl font-bold">Heading 2 (text-3xl)</h2>
+                <p class="text-text-secondary mt-1">Used for section headings</p>
+              </div>
+              <div>
+                <h3 class="text-2xl font-semibold">Heading 3 (text-2xl)</h3>
+                <p class="text-text-secondary mt-1">Used for subsection headings</p>
+              </div>
+              <div>
+                <h4 class="text-xl font-semibold">Heading 4 (text-xl)</h4>
+                <p class="text-text-secondary mt-1">Used for card headings</p>
+              </div>
+              <div>
+                <h5 class="text-lg font-medium">Heading 5 (text-lg)</h5>
+                <p class="text-text-secondary mt-1">Used for small section headings</p>
+              </div>
+              <div>
+                <h6 class="text-md font-medium">Heading 6 (text-md)</h6>
+                <p class="text-text-secondary mt-1">Used for the smallest headings</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-4">Text Styles</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <p class="text-md mb-2">Default paragraph text with normal weight.</p>
+                <p class="text-md font-medium mb-2">Medium weight paragraph text for emphasis.</p>
+                <p class="text-md font-semibold mb-2">Semi-bold paragraph text for stronger emphasis.</p>
+                <p class="text-md font-bold mb-2">Bold paragraph text for maximum emphasis.</p>
+                <p class="text-sm mb-2">Small text (text-sm) used for secondary information.</p>
+                <p class="text-xs mb-2">Extra small text (text-xs) used for metadata and timestamps.</p>
+              </div>
+              <div>
+                <p class="text-primary-color mb-2">Primary colored text</p>
+                <p class="text-secondary-color mb-2">Secondary colored text</p>
+                <p class="text-accent-color mb-2">Accent colored text</p>
+                <p class="text-highlight-color mb-2">Highlight colored text</p>
+                <p class="text-text-secondary mb-2">Secondary text color</p>
+                <p class="text-success mb-2">Success text color</p>
+                <p class="text-warning mb-2">Warning text color</p>
+                <p class="text-error mb-2">Error text color</p>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Text Formatting</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <p class="italic mb-2">Italic text for emphasis</p>
+                <p class="underline mb-2">Underlined text</p>
+                <p class="line-through mb-2">Strikethrough text</p>
+                <p class="uppercase mb-2">Uppercase text</p>
+                <p class="lowercase mb-2">Lowercase text</p>
+                <p class="capitalize mb-2">Capitalized text</p>
+              </div>
+              <div>
+                <p class="leading-none mb-2">Leading none (1.0)</p>
+                <p class="leading-tight mb-2">Leading tight (1.25)</p>
+                <p class="leading-normal mb-2">Leading normal (1.5)</p>
+                <p class="leading-relaxed mb-2">Leading relaxed (1.75)</p>
+                <p class="leading-loose mb-2">Leading loose (2.0)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Buttons Section -->
+      <section class="section" id="buttons">
+        <div class="section-header">
+          <h2 class="text-2xl font-semibold">Buttons</h2>
+        </div>
+        
+        <div class="card p-6">
+          <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-4">Button Styles</h3>
+            <div class="flex flex-wrap gap-4">
+              <button class="btn btn-primary">Primary Button</button>
+              <button class="btn btn-secondary">Secondary Button</button>
+              <button class="btn btn-outline">Outline Button</button>
+              <button class="btn btn-text">Text Button</button>
+              <button class="btn btn-success">Success Button</button>
+              <button class="btn btn-warning">Warning Button</button>
+              <button class="btn btn-error">Error Button</button>
+            </div>
+          </div>
+          
+          <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-4">Button Sizes</h3>
+            <div class="flex flex-wrap gap-4 items-center">
+              <button class="btn btn-primary btn-sm">Small Button</button>
+              <button class="btn btn-primary">Default Button</button>
+              <button class="btn btn-primary btn-lg">Large Button</button>
+            </div>
+          </div>
+          
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Button with Icons</h3>
+            <div class="flex flex-wrap gap-4">
+              <button class="btn btn-primary flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"></path>
+                </svg>
+                Add New
+              </button>
+              <button class="btn btn-outline flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
+                </svg>
+                Refresh
+              </button>
+              <button class="btn btn-secondary flex items-center">
+                Save
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Form Elements Section -->
+      <section class="section" id="forms">
+        <div class="section-header">
+          <h2 class="text-2xl font-semibold">Form Elements</h2>
+        </div>
+        
+        <div class="card p-6">
+          <form>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Text Inputs -->
+              <div>
+                <h3 class="text-lg font-semibold mb-4">Text Inputs</h3>
+                
+                <div class="mb-4">
+                  <label for="default-input" class="form-label">Default Input</label>
+                  <input type="text" id="default-input" class="form-input" placeholder="Enter text...">
+                </div>
+                
+                <div class="mb-4">
+                  <label for="with-hint" class="form-label">Input with Hint</label>
+                  <input type="text" id="with-hint" class="form-input" placeholder="Enter your username">
+                  <p class="form-hint">Username must be 3-20 characters</p>
+                </div>
+                
+                <div class="mb-4">
+                  <label for="with-error" class="form-label">Input with Error</label>
+                  <input type="text" id="with-error" class="form-input border-error" value="admin@#$">
+                  <p class="form-error">Username contains invalid characters</p>
+                </div>
+                
+                <div class="mb-4">
+                  <label for="disabled-input" class="form-label">Disabled Input</label>
+                  <input type="text" id="disabled-input" class="form-input bg-gray-100" disabled="" value="Can't edit this field">
+                </div>
+                
+                <div class="mb-4">
+                  <label for="with-icon" class="form-label">Input with Icon</label>
+                  <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-text-secondary" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                      </svg>
+                    </div>
+                    <input type="text" id="with-icon" class="form-input pl-10" placeholder="Enter username">
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Select, Textarea, Checkbox, Radio -->
+              <div>
+                <h3 class="text-lg font-semibold mb-4">Other Inputs</h3>
+                
+                <div class="mb-4">
+                  <label for="select" class="form-label">Select Input</label>
+                  <select id="select" class="form-select">
+                    <option value="" disabled="" selected="">Select an option</option>
+                    <option value="option1">Option 1</option>
+                    <option value="option2">Option 2</option>
+                    <option value="option3">Option 3</option>
+                </select></div></div></div></form></div></section></main></div></body></html>

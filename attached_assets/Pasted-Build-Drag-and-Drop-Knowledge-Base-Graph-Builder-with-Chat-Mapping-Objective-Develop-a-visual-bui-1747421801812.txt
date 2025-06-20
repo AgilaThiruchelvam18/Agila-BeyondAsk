@@ -1,0 +1,129 @@
+Build Drag-and-Drop Knowledge Base Graph Builder with Chat Mapping
+🟦 Objective
+Develop a visual builder where users can:
+Create a seperate page in the app
+Create knowledge base nodes, each acting as a container for multiple documents
+
+Upload and manage documents within each node
+
+Connect nodes to a chat widget, so the AI chat experience uses only the mapped node’s content
+
+Visually represent relationships between knowledge and conversations (mind-mapping style)
+
+🧩 Core Functional Requirements
+1. Node-Based Visual Interface
+Use a library like React Flow to build a drag-and-drop canvas
+
+Each node represents a knowledge base container:
+
+Title of the knowledge base
+
+Document count or labels
+
+Drag to reposition
+
+Nodes can be connected to:
+
+Other knowledge nodes (for future linking)
+
+A chat widget node (to simulate agent binding)
+
+✅ Support zoom, pan, selection, and snapping
+
+2. Node Data Structure
+Each knowledge base node should store:
+
+json
+Copy
+Edit
+{
+  "id": "node_kb_sales_docs",
+  "name": "Sales Documents",
+  "documents": [
+    { "docId": "doc1", "name": "Pricing Guide", "content": "..." },
+    { "docId": "doc2", "name": "Sales Playbook", "content": "..." }
+  ]
+}
+Allow document upload, edit, delete within the node's side panel
+
+Save each node and its documents in a backend or local store
+
+✅ Use file or text input for docs
+
+3. Mapping Knowledge Base to Chat Widget
+Add a chat widget node to the canvas
+
+Allow users to draw a connection from any knowledge base node to the chat widget
+
+When connected, the chat widget uses that knowledge base’s documents as the context (RAG style)
+
+✅ On connect:
+
+Store knowledgeBaseId reference inside the chat widget node:
+
+json
+Copy
+Edit
+{
+  "id": "chat_node_1",
+  "type": "chat_widget",
+  "linkedKnowledgeBase": "node_kb_sales_docs"
+}
+✅ Update the chat behavior to:
+
+Load and query only the connected node’s documents
+
+Fallback if no node is connected
+
+4. Chat Widget Integration
+Embed a live chat widget preview on the canvas or sidebar
+
+When user types a message:
+
+Pass it through your existing agent API
+
+Use the connected knowledge base documents as the context or knowledgeBaseIds
+
+✅ Ensure confidence threshold, fallback message, and rules still apply
+
+🗂️ Suggested File & Component Structure
+bash
+Copy
+Edit
+/knowledgeflow
+  └── Canvas.jsx              → React Flow implementation
+  └── KnowledgeNode.jsx       → Knowledge base node UI
+  └── ChatWidgetNode.jsx      → Chat widget preview and config
+  └── NodeSidebar.jsx         → Document upload/edit panel
+  └── nodeStore.js            → Save/load nodes and mappings
+💾 Backend Tasks
+Prompt Replit Agent to:
+
+Create endpoints:
+
+POST /knowledgebase/:nodeId/document (add doc)
+
+DELETE /knowledgebase/:nodeId/document/:docId
+
+GET /knowledgebase/:nodeId (get all docs in a node)
+
+Store each node + docs using Replit DB or file system
+
+🔐 Auth & Security
+Only allow node and document management by the node creator
+
+Validate chat queries are using allowed nodes for that user
+
+🌐 Behavior & Preferences
+Chat behavior dynamically switches based on connected knowledge base
+
+If multiple nodes connect to one chat widget, allow toggling or merging logic
+
+Replit Agent interaction: English
+
+Interface: English
+
+Support multilingual documents for global use cases
+
+✅ Summary
+You’re building a visual, intuitive mind-mapping tool that connects knowledge containers to conversational AI agents. This enhances control, reusability, and insight over how AI behaves per knowledge source.

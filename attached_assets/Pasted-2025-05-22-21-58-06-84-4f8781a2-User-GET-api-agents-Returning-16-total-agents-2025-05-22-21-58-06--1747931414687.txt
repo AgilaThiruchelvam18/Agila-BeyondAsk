@@ -1,0 +1,160 @@
+2025-05-22 21:58:06.84
+4f8781a2
+User
+GET /api/agents: Returning 16 total agents
+2025-05-22 21:58:06.84
+4f8781a2
+User
+4:28:06 PM [express] GET /api/agents 200 in 1832ms :: [{"id":6,"userId":4,"name":"About FTC","descri…
+2025-05-22 21:58:09.30
+4f8781a2
+User
+Token extracted from authorization header
+2025-05-22 21:58:09.30
+4f8781a2
+User
+Decoded payload: {"iss":"https://dev-d8wu1dtr5o6osbml.us.auth0.com/","sub":"auth0|67eecef07cf3c1e3ac1bb754","aud":["https://dev-d8wu1dtr5o6osbml.us.auth0.com/api/v2/","https://dev-d8wu1dtr5o6osbml.us.auth0.com/userinfo"],"iat":1747928872,"exp":1747936072,"scope":"openid profile email","azp":"aVT07QHAv8rCCMjloxScp4up0EkxRYgr"}
+2025-05-22 21:58:09.30
+4f8781a2
+User
+Token verified successfully, subject: auth0|67eecef07cf3c1e3ac1bb754
+2025-05-22 21:58:09.36
+4f8781a2
+User
+Found existing user with ID: 4
+2025-05-22 21:58:09.42
+4f8781a2
+User
+4:28:09 PM [express] GET /api/user 304 in 123ms :: {"id":4,"authId":"auth0|67eecef07cf3c1e3ac1bb754"…
+2025-05-22 21:58:09.76
+4f8781a2
+User
+Token extracted from authorization header
+2025-05-22 21:58:09.76
+4f8781a2
+User
+Decoded payload: {"iss":"https://dev-d8wu1dtr5o6osbml.us.auth0.com/","sub":"auth0|67eecef07cf3c1e3ac1bb754","aud":["https://dev-d8wu1dtr5o6osbml.us.auth0.com/api/v2/","https://dev-d8wu1dtr5o6osbml.us.auth0.com/userinfo"],"iat":1747928872,"exp":1747936072,"scope":"openid profile email","azp":"aVT07QHAv8rCCMjloxScp4up0EkxRYgr"}
+2025-05-22 21:58:09.76
+4f8781a2
+User
+Token verified successfully, subject: auth0|67eecef07cf3c1e3ac1bb754
+2025-05-22 21:58:09.76
+4f8781a2
+User
+GET /api/knowledge-bases request received
+2025-05-22 21:58:09.76
+4f8781a2
+User
+Token extracted from authorization header
+2025-05-22 21:58:09.76
+4f8781a2
+User
+Decoded payload: {"iss":"https://dev-d8wu1dtr5o6osbml.us.auth0.com/","sub":"auth0|67eecef07cf3c1e3ac1bb754","aud":["https://dev-d8wu1dtr5o6osbml.us.auth0.com/api/v2/","https://dev-d8wu1dtr5o6osbml.us.auth0.com/userinfo"],"iat":1747928872,"exp":1747936072,"scope":"openid profile email","azp":"aVT07QHAv8rCCMjloxScp4up0EkxRYgr"}
+2025-05-22 21:58:09.76
+4f8781a2
+User
+Token verified successfully, subject: auth0|67eecef07cf3c1e3ac1bb754
+2025-05-22 21:58:09.77
+4f8781a2
+User
+GET /api/agents request received
+2025-05-22 21:58:09.77
+4f8781a2
+User
+Token extracted from authorization header
+2025-05-22 21:58:09.77
+4f8781a2
+User
+Decoded payload: {"iss":"https://dev-d8wu1dtr5o6osbml.us.auth0.com/","sub":"auth0|67eecef07cf3c1e3ac1bb754","aud":["https://dev-d8wu1dtr5o6osbml.us.auth0.com/api/v2/","https://dev-d8wu1dtr5o6osbml.us.auth0.com/userinfo"],"iat":1747928872,"exp":1747936072,"scope":"openid profile email","azp":"aVT07QHAv8rCCMjloxScp4up0EkxRYgr"}
+2025-05-22 21:58:09.77
+4f8781a2
+User
+Token verified successfully, subject: auth0|67eecef07cf3c1e3ac1bb754
+2025-05-22 21:58:09.78
+4f8781a2
+User
+GET /api/predefined-agents request received
+2025-05-22 21:58:09.78
+4f8781a2
+User
+PostgresqlAdapter.getPredefinedAgents: Fetching predefined agent templates
+2025-05-22 21:58:09.81
+4f8781a2
+User
+Found existing user with ID: 4
+2025-05-22 21:58:09.81
+4f8781a2
+User
+GET /api/knowledge-bases: Fetching knowledge bases for user ID 4, includeShared=true
+2025-05-22 21:58:09.81
+4f8781a2
+User
+Found existing user with ID: 4
+2025-05-22 21:58:09.83
+4f8781a2
+User
+Found existing user with ID: 4
+2025-05-22 21:58:09.83
+4f8781a2
+User
+GET /api/agents: Fetching agents for user ID 4, includeShared=true
+2025-05-22 21:58:09.85
+4f8781a2
+User
+PostgresqlAdapter.getPredefinedAgents: Found 32 predefined agent templates
+2025-05-22 21:58:09.85
+4f8781a2
+User
+GET /api/predefined-agents: Found 32 predefined agent templates
+2025-05-22 21:58:09.85
+4f8781a2
+User
+4:28:09 PM [express] GET /api/predefined-agents 304 in 68ms :: [{"id":72,"userId":0,"name":"Blog Pos…
+2025-05-22 21:58:09.93
+4f8781a2
+User
+4:28:09 PM [express] GET /api/metrics/usage-summary 304 in 172ms :: {"llm_tokens_used":{"current":"7…
+2025-05-22 21:58:10.26
+4f8781a2
+User
+Token extracted from authorization header
+2025-05-22 21:58:10.26
+4f8781a2
+User
+Decoded payload: {"iss":"https://dev-d8wu1dtr5o6osbml.us.auth0.com/","sub":"auth0|67eecef07cf3c1e3ac1bb754","aud":["https://dev-d8wu1dtr5o6osbml.us.auth0.com/api/v2/","https://dev-d8wu1dtr5o6osbml.us.auth0.com/userinfo"],"iat":1747928872,"exp":1747936072,"scope":"openid profile email","azp":"aVT07QHAv8rCCMjloxScp4up0EkxRYgr"}
+2025-05-22 21:58:10.26
+4f8781a2
+User
+Token verified successfully, subject: auth0|67eecef07cf3c1e3ac1bb754
+2025-05-22 21:58:10.32
+4f8781a2
+User
+Found existing user with ID: 4
+2025-05-22 21:58:10.37
+4f8781a2
+User
+4:28:10 PM [express] GET /api/metrics/daily 304 in 112ms :: [{"id":22,"userId":4,"teamId":null,"date…
+2025-05-22 21:58:11.09
+4f8781a2
+User
+GET /api/agents: User has access to 1 shared agents
+2025-05-22 21:58:11.09
+4f8781a2
+User
+GET /api/agents: Returning 16 total agents
+2025-05-22 21:58:11.09
+4f8781a2
+User
+4:28:11 PM [express] GET /api/agents 200 in 1322ms :: [{"id":6,"userId":4,"name":"About FTC","descri…
+2025-05-22 21:58:11.15
+4f8781a2
+User
+GET /api/knowledge-bases: User has access to 2 shared knowledge bases
+2025-05-22 21:58:11.15
+4f8781a2
+User
+GET /api/knowledge-bases: Returning 15 total knowledge bases
+2025-05-22 21:58:11.15
+4f8781a2
+User
+4:28:11 PM [express] GET

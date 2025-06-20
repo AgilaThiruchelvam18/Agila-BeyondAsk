@@ -1,0 +1,422 @@
+ // Knowledge Base endpoints
+  app.get("/api/knowledge-bases", async (req: Request, res: Response) => {
+    console.log("GET /api/knowledge-bases request received");
+    try {
+      const userId = await getUserIdFromRequest(req);
+      if (!userId) {
+        console.log(
+          "GET /api/knowledge-bases: Unauthorized - no user ID from token",
+        );
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      // Include team-accessible resources flag
+      const includeShared = req.query.includeShared !== "false";
+      console.log(
+        `GET /api/knowledge-bases: Fetching knowledge bases for user ID ${userId}, includeShared=${includeShared}`,
+      );
+
+      // Get user's own knowledge bases
+      const ownedKnowledgeBases =
+        await storage.getKnowledgeBasesByUserId(userId);
+      let result = [...ownedKnowledgeBases];
+
+      // If includeShared is true, add knowledge bases accessible through team permissions
+      if (includeShared) {
+        try {
+          // Get IDs of knowledge bases accessible through teams
+          const accessibleKbIds =
+            await resourcePermissionService.getUserAccessibleResources(
+              userId,
+              "knowledgeBase",
+            );
+
+          if (accessibleKbIds.length > 0) {
+            console.log(
+              `GET /api/knowledge-bases: User has access to ${accessibleKbIds.length} shared knowledge bases`,
+            );
+
+            // OPTIMIZED: Fetch shared knowledge bases efficiently
+            const ownedKbIds = ownedKnowledgeBases.map((kb) => kb.id);
+            const sharedKbIds = accessibleKbIds.filter(
+              (id) => !ownedKbIds.includes(id),
+            );
+
+            // Fetch shared knowledge bases individually since batch method doesn't exist
+            const sharedKbs: any[] = [];
+            for (const kbId of sharedKbIds) {
+              try {
+                const kb = await storage.getKnowledgeBase(kbId);
+                if (kb) {
+                  sharedKbs.push({
+                    ...kb,
+                    isShared: true,
+                  });
+                }
+              } catch (error) {
+                console.warn(`Failed to fetch shared knowledge base ${kbId}:`, error);
+              }
+            }
+
+            // Combine with user's own knowledge bases
+            result = [...ownedKnowledgeBases, ...sharedKbs];
+          }
+        } catch (permError) {
+          console.error(
+            "GET /api/knowledge-bases: Error fetching shared knowledge bases:",
+            permError,
+          );
+          // Continue with just the user's own knowledge bases
+        }
+      }
+
+      console.log(
+        `GET /api/knowledge-bases: Returning ${result.length} total knowledge bases`,
+      );
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("GET /api/knowledge-bases ERROR:", error);
+      return res
+        .status(500)
+        .json({
+          message: "Failed to fetch knowledge bases",
+          error: String(error),
+        });
+    }
+  });
+
+  // Get agents that use a specific knowledge base
+  app.get(
+    "/api/knowledge-bases/:id/agents",
+    async (req: Request, res: Response) => {
+      const userId = await getUserIdFromRequest(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const kbId = parseInt(req.params.id);
+      if (isNaN(kbId)) {
+        return res.status(400).json({ message: "Invalid knowledge base ID" });
+      }
+
+      const kb = await storage.getKnowledgeBase(kbId);
+      if (!kb) {
+        return res.status(404).json({ message: "Knowledge base not found" });
+      }
+
+      if (kb.userId !== userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      // Get all agents for this user
+      const allAgents = await storage.getAgentsByUserId(userId);
+
+      // Filter agents that have this knowledge base ID in their knowledgeBaseIds array
+      const connectedAgents = allAgents.filter(
+        (agent) =>
+          Array.isArray(agent.knowledgeBaseIds) &&
+          agent.knowledgeBaseIds.includes(kbId),
+      );
+
+      res.status(200).json(connectedAgents);
+    },
+  );
+
+  app.get("/api/knowledge-bases/:id", async (req: Request, res: Response) => {
+    const userId = await getUserIdFromRequest(req);
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const kbId = parseInt(req.params.id);
+    if (isNaN(kbId)) {
+      return res.status(400).json({ message: "Invalid knowledge base ID" });
+    }
+
+    const kb = await storage.getKnowledgeBase(kbId);
+    if (!kb) {
+      return res.status(404).json({ message: "Knowledge base not found" });
+    }
+
+    // If user is the owner, allow access
+    if (kb.userId === userId) {
+      return res.status(200).json(kb);
+    }
+
+    // If user is not the owner, check if they have team permission to access this knowledge base
+    try {
+      // Get all resources user has access to through team permissions
+      const accessibleKbIds =
+        await resourcePermissionService.getUserAccessibleResources(
+          userId,
+          "knowledgeBase",
+        );
+
+      if (accessibleKbIds.includes(kbId)) {
+        // User has team permission to access this knowledge base, add a flag to indicate it's shared
+        return res.status(200).json({
+          ...kb,
+          isShared: true,
+        });
+      } else {
+        // User does not have team permission
+        return res.status(403).json({ message: "Forbidden" });
+      }
+    } catch (error) {
+      console.error(
+        `Error checking team permissions for knowledge base ${kbId}:`,
+        error,
+      );
+      return res.status(500).json({
+        message: "Failed to check permissions",
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  });
+
+  app.post("/api/knowledge-bases", async (req: Request, res: Response) => {
+    console.log("POST /api/knowledge-bases - Creating new knowledge base");
+    console.log(
+      "Authorization header:",
+      req.headers.authorization ? "Present" : "Missing",
+    );
+
+    const userId = await getUserIdFromRequest(req);
+    console.log("User ID from request:", userId);
+
+    if (!userId) {
+      console.log("User ID is null, returning 401 Unauthorized");
+      return res
+        .status(401)
+        .json({
+          message: "Unauthorized",
+          error: "User ID could not be retrieved",
+        });
+    }
+
+    try {
+      console.log("Parsing knowledge base data with user ID:", userId);
+      const kbData = insertKnowledgeBaseSchema.parse({
+        ...req.body,
+        userId,
+      });
+
+      console.log("Creating knowledge base in storage:", kbData);
+      const newKb = await storage.createKnowledgeBase(kbData);
+      console.log("Knowledge base created successfully:", newKb.id);
+
+      // Record usage metric for knowledge base creation
+      try {
+        const subscriptionService = SubscriptionService.getInstance();
+        await subscriptionService.recordUsage(
+          userId,
+          "knowledge_base_created",
+          1,
+        );
+      } catch (usageError) {
+        console.warn(
+          "Failed to record usage metric for knowledge base creation:",
+          usageError,
+        );
+      }
+
+      res.status(201).json(newKb);
+    } catch (error) {
+      console.error("Error creating knowledge base:", error);
+      if (error instanceof z.ZodError) {
+        return res
+          .status(400)
+          .json({
+            message: "Invalid knowledge base data",
+            errors: error.errors,
+          });
+      }
+      res.status(500).json({
+        message: "Failed to create knowledge base",
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  });
+
+  app.put("/api/knowledge-bases/:id", async (req: Request, res: Response) => {
+    const userId = await getUserIdFromRequest(req);
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const kbId = parseInt(req.params.id);
+    if (isNaN(kbId)) {
+      return res.status(400).json({ message: "Invalid knowledge base ID" });
+    }
+
+    const kb = await storage.getKnowledgeBase(kbId);
+    if (!kb) {
+      return res.status(404).json({ message: "Knowledge base not found" });
+    }
+
+    if (kb.userId !== userId) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    try {
+      const updatedKb = await storage.updateKnowledgeBase(kbId, req.body);
+      res.status(200).json(updatedKb);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update knowledge base" });
+    }
+  });
+
+  // Add PATCH endpoint for knowledge bases (to match the client's request method)
+  app.patch("/api/knowledge-bases/:id", async (req: Request, res: Response) => {
+    const userId = await getUserIdFromRequest(req);
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const kbId = parseInt(req.params.id);
+    if (isNaN(kbId)) {
+      return res.status(400).json({ message: "Invalid knowledge base ID" });
+    }
+
+    const kb = await storage.getKnowledgeBase(kbId);
+    if (!kb) {
+      return res.status(404).json({ message: "Knowledge base not found" });
+    }
+
+    if (kb.userId !== userId) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    try {
+      console.log(`PATCH /api/knowledge-bases/${kbId} with data:`, req.body);
+      const updatedKb = await storage.updateKnowledgeBase(kbId, req.body);
+      res.status(200).json(updatedKb);
+    } catch (error) {
+      console.error("Error updating knowledge base:", error);
+      res.status(500).json({ message: "Failed to update knowledge base" });
+    }
+  });
+
+  app.get(
+    "/api/knowledge-bases/:id/dependencies",
+    async (req: Request, res: Response) => {
+      const userId = await getUserIdFromRequest(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const kbId = parseInt(req.params.id);
+      if (isNaN(kbId)) {
+        return res.status(400).json({ message: "Invalid knowledge base ID" });
+      }
+
+      const kb = await storage.getKnowledgeBase(kbId);
+      if (!kb) {
+        return res.status(404).json({ message: "Knowledge base not found" });
+      }
+
+      if (kb.userId !== userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      try {
+        const dependencies = await storage.getKnowledgeBaseDependencies(kbId);
+        res.status(200).json(dependencies);
+      } catch (error) {
+        console.error(
+          `Error fetching knowledge base ${kbId} dependencies:`,
+          error,
+        );
+        res.status(500).json({
+          message: "Failed to fetch knowledge base dependencies",
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    },
+  );
+
+  app.delete(
+    "/api/knowledge-bases/:id/cascade",
+    async (req: Request, res: Response) => {
+      const userId = await getUserIdFromRequest(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const kbId = parseInt(req.params.id);
+      if (isNaN(kbId)) {
+        return res.status(400).json({ message: "Invalid knowledge base ID" });
+      }
+
+      const kb = await storage.getKnowledgeBase(kbId);
+      if (!kb) {
+        return res.status(404).json({ message: "Knowledge base not found" });
+      }
+
+      if (kb.userId !== userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      try {
+        const success = await storage.cascadeDeleteKnowledgeBase(kbId);
+        if (success) {
+          res.status(204).send();
+        } else {
+          res.status(500).json({ message: "Failed to delete knowledge base" });
+        }
+      } catch (error) {
+        console.error(`Error cascade deleting knowledge base ${kbId}:`, error);
+        res.status(500).json({
+          message: "Failed to delete knowledge base",
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    },
+  );
+
+  app.delete(
+    "/api/knowledge-bases/:id",
+    async (req: Request, res: Response) => {
+      const userId = await getUserIdFromRequest(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const kbId = parseInt(req.params.id);
+      if (isNaN(kbId)) {
+        return res.status(400).json({ message: "Invalid knowledge base ID" });
+      }
+
+      const kb = await storage.getKnowledgeBase(kbId);
+      if (!kb) {
+        return res.status(404).json({ message: "Knowledge base not found" });
+      }
+
+      if (kb.userId !== userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      try {
+        const success = await storage.deleteKnowledgeBase(kbId);
+        if (success) {
+          res.status(204).send();
+        } else {
+          res.status(500).json({ message: "Failed to delete knowledge base" });
+        }
+      } catch (error: any) {
+        // If the error contains dependencies, it means we can't delete due to dependencies
+        if (error.dependencies) {
+          return res.status(409).json({
+            message: error.message,
+            dependencies: error.dependencies,
+          });
+        }
+
+        console.error(`Error deleting knowledge base ${kbId}:`, error);
+        res.status(500).json({
+          message: "Failed to delete knowledge base",
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    },
+  );

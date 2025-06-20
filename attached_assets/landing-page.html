@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BeyondAsk – Intelligent Automation</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #6D6AFF;
+      --color-secondary: #FF4BCB;
+      --color-accent: #00C2FF;
+      --color-highlight: #FFB800;
+      --color-background: #F8F9FE;
+      --color-surface-light: #FFFFFF;
+      --color-surface-medium: #F0F2FA;
+      --color-text-primary: #2C2C4A;
+      --color-text-secondary: #6E7191;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--color-background);
+      color: var(--color-text-primary);
+    }
+    
+    .bg-primary { background-color: var(--color-primary); }
+    .bg-secondary { background-color: var(--color-secondary); }
+    .bg-accent { background-color: var(--color-accent); }
+    .bg-highlight { background-color: var(--color-highlight); }
+    .bg-surface-light { background-color: var(--color-surface-light); }
+    .bg-surface-medium { background-color: var(--color-surface-medium); }
+    
+    .text-primary-color { color: var(--color-primary); }
+    .text-secondary-color { color: var(--color-secondary); }
+    .text-accent-color { color: var(--color-accent); }
+    .text-highlight-color { color: var(--color-highlight); }
+    .text-text-secondary { color: var(--color-text-secondary); }
+    
+    .btn-primary {
+      background-color: var(--color-primary);
+      color: white;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--color-secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    
+    .btn-secondary {
+      background-color: var(--color-surface-medium);
+      color: var(--color-text-primary);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #E4E8F5;
+      transform: translateY(-2px);
+    }
+    
+    .gradient-text {
+      background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .feature-card {
+      background-color: var(--color-surface-light);
+      border-radius: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+    }
+    
+    .gradient-border {
+      position: relative;
+      border-radius: 0.5rem;
+      z-index: 0;
+    }
+    
+    .gradient-border::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+      border-radius: 0.6rem;
+      z-index: -1;
+    }
+    
+    .testimonial-card {
+      background-color: var(--color-surface-light);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .float {
+      animation: float 6s ease-in-out infinite;
+    }
+    
+    .float-delay-1 {
+      animation-delay: 1s;
+    }
+    
+    .float-delay-2 {
+      animation-delay: 2s;
+    }
+    
+    .nav-link {
+      color: var(--color-text-secondary);
+      transition: color 0.3s ease;
+    }
+    
+    .nav-link:hover {
+      color: var(--color-primary);
+    }
+    
+    .pricing-card {
+      background-color: var(--color-surface-light);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    }
+    
+    .pricing-popular {
+      background-color: var(--color-primary);
+      background-opacity: 0.05;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="fixed top-0 w-full z-50 backdrop-filter backdrop-blur-lg bg-opacity-80 bg-surface-light border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <!-- Logo -->
+            <svg class="w-10 h-10" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="40" height="40" rx="8" fill="url(#paint0_linear)" />
+              <path d="M12 20C12 13.9249 16.9249 9 23 9V31C16.9249 31 12 26.0751 12 20Z" fill="white"/>
+              <path d="M24 15H28C29.6569 15 31 16.3431 31 18V22C31 23.6569 29.6569 25 28 25H24V15Z" fill="white"/>
+              <defs>
+                <linearGradient id="paint0_linear" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#6D6AFF" />
+                  <stop offset="1" stop-color="#FF4BCB" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <span class="ml-2 text-xl font-bold">Beyond<span class="text-secondary-color">Ask</span></span>
+          </div>
+        </div>
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="#features" class="nav-link font-medium">Features</a>
+          <a href="#benefits" class="nav-link font-medium">Benefits</a>
+          <a href="#testimonials" class="nav-link font-medium">Testimonials</a>
+          <a href="#pricing" class="nav-link font-medium">Pricing</a>
+        </div>
+        <div class="flex items-center">
+          <button class="btn-primary rounded-lg px-5 py-2 font-medium">Get Started</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden relative">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex flex-col md:flex-row items-center">
+        <div class="md:w-1/2 mb-12 md:mb-0">
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+            Intelligent <span class="gradient-text">Automation</span> for the Modern Workflow
+          </h1>
+          <p class="text-text-secondary text-lg md:text-xl mb-8 max-w-lg">
+            BeyondAsk leverages advanced AI to optimize your business processes, 
+            boosting productivity while reducing operational costs.
+          </p>
+          <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+            <button class="btn-primary rounded-lg px-8 py-4 font-semibold text-lg">
+              Start Free Trial
+            </button>
+            <button class="btn-secondary rounded-lg px-8 py-4 font-semibold text-lg">
+              Watch Demo
+            </button>
+          </div>
+          <div class="mt-8 flex items-center space-x-2">
+            <div class="flex -space-x-2">
+              <div class="w-10 h-10 rounded-full bg-gray-200 border-2 border-white"></div>
+              <div class="w-10 h-10 rounded-full bg-gray-200 border-2 border-white"></div>
+              <div class="w-10 h-10 rounded-full bg-gray-200 border-2 border-white"></div>
+            </div>
+            <p class="text-text-secondary"><span class="font-medium text-text-primary">500+</span> companies trust BeyondAsk</p>
+          </div>
+        </div>
+        <div class="md:w-1/2 relative">
+          <!-- Hero image/illustration placeholder -->
+          <div class="w-full h-80 md:h-96 lg:h-112 relative">
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-primary opacity-10 blur-3xl"></div>
+            <div class="absolute top-1/3 left-1/3 w-32 h-32 rounded-lg bg-surface-light p-4 float shadow-lg border border-gray-100">
+              <div class="w-full h-2 bg-accent rounded mb-2"></div>
+              <div class="w-3/4 h-2 bg-gray-200 rounded mb-4"></div>
+              <div class="flex justify-between items-center">
+                <div class="w-8 h-8 rounded-full bg-highlight"></div>
+                <div class="w-1/2 h-2 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+            <div class="absolute bottom-1/3 right-1/3 w-40 h-40 rounded-lg bg-surface-light p-4 float float-delay-1 shadow-lg border border-gray-100">
+              <div class="w-full h-2 bg-secondary rounded mb-2"></div>
+              <div class="w-2/3 h-2 bg-gray-200 rounded mb-4"></div>
+              <div class="grid grid-cols-2 gap-2">
+                <div class="w-full h-8 rounded bg-gray-100"></div>
+                <div class="w-full h-8 rounded bg-gray-100"></div>
+                <div class="w-full h-8 rounded bg-gray-100"></div>
+                <div class="w-full h-8 rounded bg-gray-100"></div>
+              </div>
+            </div>
+            <div class="absolute top-1/4 right-1/4 w-36 h-36 rounded-lg bg-surface-light p-4 float float-delay-2 shadow-lg border border-gray-100">
+              <div class="w-full h-2 bg-primary rounded mb-2"></div>
+              <div class="w-1/2 h-2 bg-gray-200 rounded mb-6"></div>
+              <div class="w-full h-20 rounded bg-gray-100 flex items-center justify-center">
+                <div class="w-8 h-8 rounded-full bg-accent"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Decorative elements -->
+    <div class="absolute top-1/4 left-10 w-2 h-2 rounded-full bg-secondary opacity-70"></div>
+    <div class="absolute top-1/3 left-20 w-3 h-3 rounded-full bg-accent opacity-70"></div>
+    <div class="absolute top-2/3 left-12 w-4 h-4 rounded-full bg-primary opacity-70"></div>
+    <div class="absolute top-1/2 right-10 w-3 h-3 rounded-full bg-highlight opacity-70"></div>
+    <div class="absolute bottom-1/4 right-20 w-2 h-2 rounded-full bg-secondary opacity-70"></div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-20 px-4 sm:px-6 lg:px-8 bg-surface-medium">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">Powerful Features</h2>
+        <p class="text-text-secondary text-lg max-w-2xl mx-auto">
+          BeyondAsk combines cutting-edge AI with intuitive design to deliver a seamless automation experience.
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Feature 1 -->
+        <div class="feature-card p-6">
+          <div class="w-12 h-12 rounded-full bg-primary bg-opacity-20 flex items-center justify-center mb-4">
+            <div class="w-6 h-6 rounded-full bg-primary"></div>
+          </div>
+          <h3 class="text-xl font-semibold mb-3">AI-Powered Workflows</h3>
+          <p class="text-text-secondary">
+            Leverage machine learning to automate complex decision-making processes and optimize workflow efficiency.
+          </p>
+        </div>
+        
+        <!-- Feature 2 -->
+        <div class="feature-card p-6">
+          <div class="w-12 h-12 rounded-full bg-secondary bg-opacity-20 flex items-center justify-center mb-4">
+            <div class="w-6 h-6 rounded-full bg-secondary"></div>
+          </div>
+          <h3 class="text-xl font-semibold mb-3">Seamless Integration</h3>
+          <p class="text-text-secondary">
+            Connect with your existing tech stack through our extensive API ecosystem and pre-built integrations.
+          </p>
+        </div>
+        
+        <!-- Feature 3 -->
+        <div class="feature-card p-6">
+          <div class="w-12 h-12 rounded-full bg-accent bg-opacity-20 flex items-center justify-center mb-4">
+            <div class="w-6 h-6 rounded-full bg-accent"></div>
+          </div>
+          <h3 class="text-xl font-semibold mb-3">Advanced Analytics</h3>
+          <p class="text-text-secondary">
+            Gain actionable insights from comprehensive dashboards and real-time performance metrics.
+          </p>
+        </div>
+        
+        <!-- Feature 4 -->
+        <div class="feature-card p-6">
+          <div class="w-12 h-12 rounded-full bg-highlight bg-opacity-20 flex items-center justify-center mb-4">
+            <div class="w-6 h-6 rounded-full bg-highlight"></div>
+          </div>
+          <h3 class="text-xl font-semibold mb-3">Natural Language Processing</h3>
+          <p class="text-text-secondary">
+            Interact with your automation system using plain language commands and queries.
+          </p>
+        </div>
+        
+        <!-- Feature 5 -->
+        <div class="feature-card p-6">
+          <div class="w-12 h-12 rounded-full bg-primary bg-opacity-20 flex items-center justify-center mb-4">
+            <div class="w-6 h-6 rounded-full bg-primary"></div>
+          </div>
+          <h3 class="text-xl font-semibold mb-3">Adaptive Learning</h3>
+          <p class="text-text-secondary">
+            Systems that evolve with your business, continuously improving through usage patterns and feedback.
+          </p>
+        </div>
+        
+        <!-- Feature 6 -->
+        <div class="feature-card p-6">
+          <div class="w-12 h-12 rounded-full bg-secondary bg-opacity-20 flex items-center justify-center mb-4">
+            <div class="w-6 h-6 rounded-full bg-secondary"></div>
+          </div>
+          <h3 class="text-xl font-semibold mb-3">Enterprise Security</h3>
+          <p class="text-text-secondary">
+            Bank-level encryption and compliance with global security standards to protect your sensitive data.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits Section -->
+  <section id="benefits" class="py-20 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">Why Choose BeyondAsk?</h2>
+        <p class="text-text-secondary text-lg max-w-2xl mx-auto">
+          Our intelligent automation solution delivers measurable results across your organization.
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div>
+          <div class="mb-8">
+            <div class="flex items-start">
+              <div class="flex-shrink-0 mt-1">
+                <div class="w-6 h-6 rounded-full bg-secondary"></div>
+              </div>
+              <div class="ml-4">
+                <h3 class="text-xl font-semibold mb-2">Boost Productivity</h3>
+                <p class="text-text-secondary">Automate repetitive tasks and free up your team to focus on strategic initiatives that drive growth.</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-8">
+            <div class="flex items-start">
+              <div class="flex-shrink-0 mt-1">
+                <div class="w-6 h-6 rounded-full bg-primary"></div>
+              </div>
+              <div class="ml-4">
+                <h3 class="text-xl font-semibold mb-2">Reduce Operational Costs</h3>
+                <p class="text-text-secondary">Minimize manual intervention and streamline processes to significantly lower operational expenses.</p>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <div class="flex items-start">
+              <div class="flex-shrink-0 mt-1">
+                <div class="w-6 h-6 rounded-full bg-accent"></div>
+              </div>
+              <div class="ml-4">
+                <h3 class="text-xl font-semibold mb-2">Minimize Errors</h3>
+                <p class="text-text-secondary">Eliminate human error with precision automation that ensures consistent, accurate results every time.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <div class="mb-8">
+            <div class="flex items-start">
+              <div class="flex-shrink-0 mt-1">
+                <div class="w-6 h-6 rounded-full bg-highlight"></div>
+              </div>
+              <div class="ml-4">
+                <h3 class="text-xl font-semibold mb-2">Scale With Confidence</h3>
+                <p class="text-text-secondary">Easily adapt to changing business needs with a flexible platform that grows with your organization.</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-8">
+            <div class="flex items-start">
+              <div class="flex-shrink-0 mt-1">
+                <div class="w-6 h-6 rounded-full bg-secondary"></div>
+              </div>
+              <div class="ml-4">
+                <h3 class="text-xl font-semibold mb-2">Enhance Customer Experience</h3>
+                <p class="text-text-secondary">Deliver faster, more personalized service with automated customer interactions and streamlined processes.</p>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <div class="flex items-start">
+              <div class="flex-shrink-0 mt-1">
+                <div class="w-6 h-6 rounded-full bg-primary"></div>
+              </div>
+              <div class="ml-4">
+                <h3 class="text-xl font-semibold mb-2">Data-Driven Decisions</h3>
+                <p class="text-text-secondary">Leverage comprehensive analytics to make informed strategic decisions backed by real-time insights.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section id="testimonials" class="py-20 px-4 sm:px-6 lg:px-8 bg-surface-medium">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">What Our Clients Say</h2>
+        <p class="text-text-secondary text-lg max-w-2xl mx-auto">
+          Discover why leading companies across industries choose BeyondAsk for their automation needs.
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Testimonial 1 -->
+        <div class="testimonial-card rounded-lg p-6 relative">
+          <div class="text-highlight text-4xl font-bold absolute -top-4 -left-2">"</div>
+          <p class="text-text-secondary mb-6 pt-4">
+            BeyondAsk has transformed our customer service operations. We've reduced response times by 65% while improving satisfaction scores.
+          </p>
+          <div class="flex items-center">
+            <div class="w-10 h-10 rounded-full bg-gray-200"></div>
+            <div class="ml-3">
+              <p class="font-medium">Sarah Johnson</p>
+              <p class="text-text-secondary text-sm">CTO, TechFusion Inc.</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Testimonial 2 -->
+        <div class="testimonial-card rounded-lg p-6 relative">
+          <div class="text-highlight text-4xl font-bold absolute -top-4 -left-2">"</div>
+          <p class="text-text-secondary mb-6 pt-4">
+            The ROI we've seen from implementing BeyondAsk has been remarkable. Our processes are 3x faster with 40% lower operational costs.
+          </p>
+          <div class="flex items-center">
+            <div class="w-10 h-10 rounded-full bg-gray-200"></div>
+            <div class="ml-3">
+              <p class="font-medium">Michael Chen</p>
+              <p class="text-text-secondary text-sm">COO, GlobalTech</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Testimonial 3 -->
+        <div class="testimonial-card rounded-lg p-6 relative">
+          <div class="text-highlight text-4xl font-bold absolute -top-4 -left-2">"</div>
+          <p class="text-text-secondary mb-6 pt-4">
+            The seamless integration capabilities of BeyondAsk allowed us to automate complex workflows across multiple departments effortlessly.
+          </p>
+          <div class="flex items-center">
+            <div class="w-10 h-10 rounded-full bg-gray-200"></div>
+            <div class="ml-3">
+              <p class="font-medium">Elena Rodriguez</p>
+              <p class="text-text-secondary text-sm">Director of Innovation, Nexus Corp</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing" class="py-20 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">Flexible Pricing Plans</h2>
+        <p class="text-text-secondary text-lg max-w-2xl mx-auto">
+          Choose the perfect plan for your business needs with transparent pricing and no hidden fees.
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Starter Plan -->
+        <div class="pricing-card rounded-lg overflow-hidden relative">
+          <div class="p-6">
+            <h3 class="text-xl font-semibold mb-2">Starter</h3>
+            <p class="text-text-secondary mb-6">Perfect for small teams and startups</p>
+            <div class="mb-6">
+              <span class="text-4xl font-bold">$49</span>
+              <span class="text-text-secondary">/month</span>
+            </div>
+            <ul class="space-y-3 mb-8">
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-accent mr-3 flex-shrink-0"></div>
+                <span>Up to 5 users</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-accent mr-3 flex-shrink-0"></div>
+                <span>10 automated workflows</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-accent mr-3 flex-shrink-0"></div>
+                <span>Basic analytics</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-accent mr-3 flex-shrink-0"></div>
+                <span>Email support</span>
+              </li>
+            </ul>
+            <button class="btn-primary w-full rounded-lg py-3 font-medium text-white">
+              Get Started
+            </button>
+          </div>
+        </div>
+        
+        <!-- Professional Plan -->
+        <div class="pricing-card rounded-lg overflow-hidden relative border-2 border-primary">
+          <div class="bg-primary text-center py-1 text-sm font-medium text-white">
+            Most Popular
+          </div>
+          <div class="p-6 pt-10">
+            <h3 class="text-xl font-semibold mb-2">Professional</h3>
+            <p class="text-text-secondary mb-6">Ideal for growing businesses</p>
+            <div class="mb-6">
+              <span class="text-4xl font-bold">$149</span>
+              <span class="text-text-secondary">/month</span>
+            </div>
+            <ul class="space-y-3 mb-8">
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-secondary mr-3 flex-shrink-0"></div>
+                <span>Up to 20 users</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-secondary mr-3 flex-shrink-0"></div>
+                <span>Unlimited workflows</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-secondary mr-3 flex-shrink-0"></div>
+                <span>Advanced analytics</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-secondary mr-3 flex-shrink-0"></div>
+                <span>Priority support</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-secondary mr-3 flex-shrink-0"></div>
+                <span>Custom integrations</span>
+              </li>
+            </ul>
+            <button class="btn-primary w-full rounded-lg py-3 font-medium text-white">
+              Get Started
+            </button>
+          </div>
+        </div>
+        
+        <!-- Enterprise Plan -->
+        <div class="pricing-card rounded-lg overflow-hidden relative">
+          <div class="p-6">
+            <h3 class="text-xl font-semibold mb-2">Enterprise</h3>
+            <p class="text-text-secondary mb-6">For large organizations</p>
+            <div class="mb-6">
+              <span class="text-4xl font-bold">Custom</span>
+            </div>
+            <ul class="space-y-3 mb-8">
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-highlight mr-3 flex-shrink-0"></div>
+                <span>Unlimited users</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-highlight mr-3 flex-shrink-0"></div>
+                <span>Unlimited workflows</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-highlight mr-3 flex-shrink-0"></div>
+                <span>Custom analytics dashboards</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-highlight mr-3 flex-shrink-0"></div>
+                <span>24/7 dedicated support</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-highlight mr-3 flex-shrink-0"></div>
+                <span>Enterprise-level security</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-highlight mr-3 flex-shrink-0"></div>
+                <span>On-premise option</span>
+              </li>
+            </ul>
+            <button class="btn-secondary w-full rounded-lg py-3 font-medium">
+              Contact Sales
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div class="absolute inset-0 bg-primary opacity-5"></div>
+    <div class="max-w-7xl mx-auto relative z-10">
+      <div class="text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">Ready to Transform Your Workflow?</h2>
+        <p class="text-text-secondary text-lg max-w-2xl mx-auto mb-10">
+          Join hundreds of forward-thinking companies already leveraging BeyondAsk to optimize their operations.
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+          <button class="btn-primary rounded-lg px-8 py-4 font-semibold text-lg">
+            Start Free Trial
+          </button>
+          <button class="btn-secondary rounded-lg px-8 py-4 font-semibold text-lg">
+            Schedule Demo
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-surface-medium py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+          <div class="flex items-center mb-4">
+            <svg class="w-10 h-10" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="40" height="40" rx="8" fill="url(#paint0_linear)" />
+              <path d="M12 20C12 13.9249 16.9249 9 23 9V31C16.9249 31 12 26.0751 12 20Z" fill="white"/>
+              <path d="M24 15H28C29.6569 15 31 16.3431 31 18V22C31 23.6569 29.6569 25 28 25H24V15Z" fill="white"/>
+              <defs>
+                <linearGradient id="paint0_linear" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#6D6AFF" />
+                  <stop offset="1" stop-color="#FF4BCB" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <span class="ml-2 text-xl font-bold">Beyond<span class="text-secondary-color">Ask</span></span>
+          </div>
+          <p class="text-text-secondary mb-4">
+            Intelligent automation for the modern enterprise.
+          </p>
+          <div class="flex space-x-4">
+            <a href="#" class="text-text-secondary hover:text-primary">
+              <div class="w-8 h-8 rounded-full bg-surface-light flex items-center justify-center">
+                <span class="text-xs">FB</span>
+              </div>
+            </a>
+            <a href="#" class="text-text-secondary hover:text-primary">
+              <div class="w-8 h-8 rounded-full bg-surface-light flex items-center justify-center">
+                <span class="text-xs">TW</span>
+              </div>
+            </a>
+            <a href="#" class="text-text-secondary hover:text-primary">
+              <div class="w-8 h-8 rounded-full bg-surface-light flex items-center justify-center">
+                <span class="text-xs">IN</span>
+              </div>
+            </a>
+          </div>
+        </div>
+        
+        <div>
+          <h4 class="font-semibold mb-4">Product</h4>
+          <ul class="space-y-2">
+            <li><a href="#" class="text-text-secondary hover:text-primary">Features</a></li>
+            <li><a href="#" class="text-text-secondary hover:text-primary">Integrations</a></li>
+            <li><a href="#" class="text-text-secondary hover:text-primary">Pricing</a></li>
+            <li><a href="#" class="text-text-secondary hover:text-primary">Changelog</a></li>
+            <li><a href="#" class="text-text-secondary hover:text-primary">Roadmap</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="font-semibold mb-4">Resources</h4>
+          <ul class="space-y-2">
+            <li><a href="#" class="text-text-secondary hover:text-primary">Documentation</a></li>
+            <li><a href="#" class="text-text-secondary hover:text-primary">API Reference</a></li>
+            <li><a href="#" class="text-text-secondary hover:text-primary">Blog</a></li>
+            <li><a href="#" class="text-text-secondary hover:text-primary">Community</a></li>
+            <li><a href="#" class="text-text-secondary hover:text-primary">Support</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="font-semibold mb-4">Company</h4>
+          <ul class="space-y-2">
+            <li><a href="#" class="text-text-secondary hover:text-primary">About</a></li>
+            <li><a href="#" class="text-text-secondary hover:text-primary">Careers</a></li>
+            <li><a href="#" class="text-text-secondary hover:text-primary">Partners</a></li>
+            <li><a href="#" class="text-text-secondary hover:text-primary">Contact</a></li>
+            <li><a href="#" class="text-text-secondary hover:text-primary">Legal</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-200 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+        <p class="text-text-secondary text-sm">© 2025 BeyondAsk. All rights reserved.</p>
+        <div class="flex space-x-6 mt-4 md:mt-0">
+          <a href="#" class="text-text-secondary hover:text-primary text-sm">Privacy Policy</a>
+          <a href="#" class="text-text-secondary hover:text-primary text-sm">Terms of Service</a>
+          <a href="#" class="text-text-secondary hover:text-primary text-sm">Cookies</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

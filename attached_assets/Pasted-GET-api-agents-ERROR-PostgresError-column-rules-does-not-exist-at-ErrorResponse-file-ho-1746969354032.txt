@@ -1,0 +1,42 @@
+GET /api/agents ERROR: PostgresError: column "rules" does not exist
+    at ErrorResponse (file:///home/runner/workspace/node_modules/postgres/src/connection.js:788:26)
+    at handle (file:///home/runner/workspace/node_modules/postgres/src/connection.js:474:6)
+    at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)
+    at TLSSocket.emit (node:events:518:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23) {
+  severity_local: 'ERROR',
+  severity: 'ERROR',
+  code: '42703',
+  position: '133',
+  file: 'parse_relation.c',
+  line: '3722',
+  routine: 'errorMissingColumn'
+}
+1:15:00 PM [express] GET /api/agents 500 in 128ms :: {"message":"Failed to fetch agents","error":"Po…
+GET /api/agents request received
+Token extracted from authorization header
+Decoded payload: {"iss":"https://dev-d8wu1dtr5o6osbml.us.auth0.com/","sub":"auth0|67ef778fcac236a33764f10e","aud":["https://dev-d8wu1dtr5o6osbml.us.auth0.com/api/v2/","https://dev-d8wu1dtr5o6osbml.us.auth0.com/userinfo"],"iat":1746969282,"exp":1746976482,"scope":"openid profile email","azp":"aVT07QHAv8rCCMjloxScp4up0EkxRYgr"}
+Token verified successfully, subject: auth0|67ef778fcac236a33764f10e
+Found existing user with ID: 5
+GET /api/agents: Fetching agents for user ID 5, includeShared=true
+GET /api/agents ERROR: PostgresError: column "rules" does not exist
+    at ErrorResponse (file:///home/runner/workspace/node_modules/postgres/src/connection.js:788:26)
+    at handle (file:///home/runner/workspace/node_modules/postgres/src/connection.js:474:6)
+    at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)
+    at TLSSocket.emit (node:events:518:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23) {
+  severity_local: 'ERROR',
+  severity: 'ERROR',
+  code: '42703',
+  position: '133',
+  file: 'parse_relation.c',
+  line: '3722',
+  routine: 'errorMissingColumn'
+}
+1:15:03 PM [express] GET /api/agents 500 in 130ms :: {"message":"Failed to fetch agents","error":"Po…

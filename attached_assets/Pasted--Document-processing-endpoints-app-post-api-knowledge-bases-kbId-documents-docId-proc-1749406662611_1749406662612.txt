@@ -1,0 +1,651 @@
+  // Document processing endpoints
+  app.post(
+    "/api/knowledge-bases/:kbId/documents/:docId/process",
+    async (req: Request, res: Response) => {
+      const userId = await getUserIdFromRequest(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const kbId = parseInt(req.params.kbId);
+      const docId = parseInt(req.params.docId);
+      if (isNaN(kbId) || isNaN(docId)) {
+        return res
+          .status(400)
+          .json({ message: "Invalid knowledge base or document ID" });
+      }
+
+      // Check if document is already being processed
+      if ((global as any)._processingDocuments[docId]) {
+        console.log(
+          `Document ${docId} is already being processed. Preventing duplicate processing.`,
+        );
+        return res.status(409).json({
+          status: "error",
+          message: "Document is already being processed",
+          code: "CONCURRENT_PROCESSING",
+        });
+      }
+
+      // Set processing lock
+      (global as any)._processingDocuments[docId] = true;
+
+      try {
+        // Check ownership
+        const kb = await storage.getKnowledgeBase(kbId);
+        if (!kb || kb.userId !== userId) {
+          return res.status(403).json({ message: "Forbidden" });
+        }
+
+        const document = await storage.getDocument(docId);
+        if (
+          !document ||
+          document.knowledgeBaseId.toString() !== kbId.toString()
+        ) {
+          return res.status(404).json({ message: "Document not found" });
+        }
+
+        // Check if document is a YouTube video that has already been successfully processed
+        const docMetadata = document.metadata as DocumentMetadata;
+        if (
+          document.sourceType === "youtube" &&
+          document.status === "processed" &&
+          document.content &&
+          docMetadata?.embedding_count && docMetadata.embedding_count > 0
+        ) {
+          console.log(
+            `Document ${docId} is a YouTube video that has already been successfully processed with ${docMetadata.embedding_count} embeddings. Skipping duplicate processing.`,
+          );
+
+          // Release the processing lock before returning
+          delete (global as any)._processingDocuments[docId];
+
+          return res.json({
+            status: "success",
+            message: "Document already processed successfully",
+            document: document,
+          });
+        }
+
+        // Immediately update the document's processing status to set initial progress
+        await storage.updateDocument(docId, {
+          status: "processing",
+          processingInfo: {
+            status_message: "Starting document processing",
+            progress: 10,
+            started_at: new Date(),
+          },
+        });
+
+        // Get provider ID from request or use default from knowledge base
+        let providerId = req.body.providerId;
+
+        // Start with a safe default value
+        let numericProviderId = 1; // Default to OpenAI (ID: 1)
+
+        try {
+          // Attempt to get from knowledge base metadata if not provided in request
+          if (!providerId && kb.metadata && typeof kb.metadata === "object") {
+            providerId = (kb.metadata as Record<string, any>).provider_id;
+          }
+
+          // Early check to catch invalid provider IDs
+          if (
+            providerId === undefined ||
+            providerId === null ||
+            providerId === "" ||
+            (typeof providerId === "number" && isNaN(providerId))
+          ) {
+            console.log(
+              `Invalid, empty, or NaN providerId: ${providerId}, using default ID: ${numericProviderId}`,
+            );
+          } else {
+            // Try to safely process the providerId based on its type
+            if (typeof providerId === "string") {
+              // Empty string check (additional safety)
+              if (providerId.trim() === "") {
+                console.log(`Empty string provider ID, using default ID: 1`);
+              }
+              // Check if it's a known provider slug first
+              else if (
+                ["openai", "anthropic", "mistral"].includes(
+                  providerId.toLowerCase(),
+                )
+              ) {
+                // Direct mapping of known providers
+                const providerMap: Record<string, number> = {
+                  openai: 1,
+                  anthropic: 2,
+                  mistral: 3,
+                };
+                numericProviderId = providerMap[providerId.toLowerCase()];
+                console.log(
+                  `Matched provider slug '${providerId}' to ID: ${numericProviderId}`,
+                );
+              }
+              // If it's not a known slug but looks like a number, try to parse it
+              else if (/^\d+$/.test(providerId)) {
+                const parsed = parseInt(providerId, 10);
+                if (
+                  !isNaN(parsed) &&
+                  parsed > 0 &&
+                  Number.isFinite(parsed) &&
+                  parsed < Number.MAX_SAFE_INTEGER
+                ) {
+                  numericProviderId = parsed;
+                  console.log(
+                    `Parsed providerId string '${providerId}' to number: ${numericProviderId}`,
+                  );
+                } else {
+                  console.log(
+                    `Parsed providerId string "${providerId}" but got invalid result: ${parsed}, using default ID: 1`,
+                  );
+                }
+              }
+              // If it's a non-numeric string that's not a known slug, try to look it up
+              else {
+                console.log(`Looking up unknown provider slug: ${providerId}`);
+                try {
+                  const id = await getProviderIdBySlug(providerId);
+                  if (
+                    id !== null &&
+                    !isNaN(id) &&
+                    id > 0 &&
+                    Number.isFinite(id)
+                  ) {
+                    numericProviderId = id;
+                    console.log(
+                      `Successfully resolved provider slug '${providerId}' to ID: ${numericProviderId}`,
+                    );
+                  } else {
+                    console.log(
+                      `Could not resolve provider slug '${providerId}' to a valid ID, using default ID: 1`,
+                    );
+                  }
+                } catch (error) {
+                  console.error(
+                    `Error resolving provider ID for ${providerId}:`,
+                    error,
+                  );
+                  console.log(`Using default ID: 1 due to error`);
+                }
+              }
+            } else if (typeof providerId === "number") {
+              // Only use the number if it's valid
+              if (
+                !isNaN(providerId) &&
+                providerId > 0 &&
+                Number.isFinite(providerId) &&
+                providerId < Number.MAX_SAFE_INTEGER
+              ) {
+                numericProviderId = providerId;
+                console.log(`Using numeric provider ID: ${numericProviderId}`);
+              } else {
+                console.log(
+                  `Invalid numeric provider ID: ${providerId}, using default ID: 1`,
+                );
+              }
+            } else {
+              console.log(
+                `providerId has unexpected type: ${typeof providerId}, using default ID: 1`,
+              );
+            }
+          }
+        } catch (error) {
+          console.error(
+            `Unexpected error during provider ID processing: ${error}`,
+            error,
+          );
+          console.log(`Using default ID: 1 due to error during processing`);
+        }
+
+        // Multiple layers of safety checks to guarantee we have a valid integer
+        try {
+          // 1. Convert to integer and check for NaN - force a Number conversion first
+          numericProviderId = Math.floor(Number(numericProviderId));
+
+          // 2. Final safety check for any remaining issues
+          if (
+            isNaN(numericProviderId) ||
+            numericProviderId <= 0 ||
+            !Number.isFinite(numericProviderId)
+          ) {
+            console.log(
+              `Final safety check caught invalid provider ID: ${numericProviderId}, using default ID: 1`,
+            );
+            numericProviderId = 1;
+          }
+
+          // 3. Extra paranoid check to ensure we have a valid positive integer
+          if (
+            typeof numericProviderId !== "number" ||
+            numericProviderId !== Math.floor(numericProviderId) ||
+            numericProviderId <= 0
+          ) {
+            console.log(
+              `Extra safety check caught non-integer provider ID: ${numericProviderId}, using default ID: 1`,
+            );
+            numericProviderId = 1;
+          }
+        } catch (error) {
+          console.error(
+            `Critical error in provider ID validation: ${error}`,
+            error,
+          );
+          numericProviderId = 1; // Safe fallback
+        }
+
+        // 4. One final check and conversion to number
+        numericProviderId = Number(numericProviderId);
+        if (isNaN(numericProviderId) || numericProviderId <= 0) {
+          console.log(
+            `CRITICAL: After all checks, provider ID is still invalid. Forcing to 1.`,
+          );
+          numericProviderId = 1;
+        }
+
+        // Update the providerId to use our verified numeric value
+        providerId = numericProviderId;
+
+        // Update document status to processing
+        await storage.updateDocument(docId, {
+          status: "processing",
+          processingInfo: {
+            started_at: new Date(),
+          },
+        });
+
+        // Process document based on its source type
+        let processedDocument;
+
+        // Log document for debugging
+        console.log("Processing document:", {
+          id: document.id,
+          title: document.title,
+          sourceType: document.sourceType,
+        });
+
+        // Get custom fields from knowledge base
+        const customFields = kb.customFields || [];
+        console.log(
+          `Knowledge base has ${customFields.length} custom fields defined`,
+        );
+
+        // Check if document has metadata with custom field values
+        const documentCustomFields =
+          document.metadata &&
+          typeof document.metadata === "object" &&
+          "custom_fields" in document.metadata
+            ? (document.metadata as Record<string, any>).custom_fields || {}
+            : {};
+        console.log(
+          `Document has custom fields metadata:`,
+          documentCustomFields,
+        );
+
+        // Validate that all required custom fields are provided
+        if (customFields && customFields.length > 0) {
+          const requiredFields = customFields
+            .filter((field) => field.required)
+            .map((field) => field.id);
+          const missingFields = requiredFields.filter(
+            (fieldId) =>
+              !documentCustomFields[fieldId] &&
+              documentCustomFields[fieldId] !== false,
+          );
+
+          if (missingFields.length > 0) {
+            const missingFieldNames = missingFields
+              .map((fieldId) => {
+                const field = customFields.find((f) => f.id === fieldId);
+                return field ? field.name : fieldId;
+              })
+              .join(", ");
+
+            console.warn(
+              `Document missing required fields: ${missingFieldNames}`,
+            );
+            // We could throw an error here, but for now let's just log a warning
+            // and proceed with processing
+          }
+        }
+
+        // Use the field defined in the schema (camelCase)
+        const sourceType = document.sourceType;
+
+        // Add debugging to see what's happening
+        console.log(`Processing document with sourceType: ${sourceType}`);
+        console.log(`Document file path: ${document.filePath}`);
+
+        // Update processing status to show we're starting content extraction
+        await storage.updateDocument(docId, {
+          processingInfo: {
+            status_message: "Extracting document content",
+            progress: 30,
+          },
+        });
+
+        // Prepare metadata with custom fields (if any)
+        const processingMetadata = {
+          document_id: docId.toString(),
+          custom_fields: documentCustomFields,
+        };
+
+        switch (sourceType) {
+          case "text":
+            processedDocument = await processText(
+              document.content || "",
+              `text:${document.title}`,
+              processingMetadata,
+            );
+            break;
+
+          case "document":
+          case "pdf":
+            if (!document.filePath) {
+              throw new Error("Document file path not found");
+            }
+
+            // Check if file is stored in S3
+            // The database column is is_s3 but it's mapped to isS3 in the Document type
+            const isS3File = true; // Force using S3 processor for all documents
+            console.log(
+              `Processing document ${document.id}: isS3=${isS3File}, path=${document.filePath}, db column mapping issue fixed`,
+            );
+
+            // For debugging
+            console.log("Document object:", JSON.stringify(document, null, 2));
+
+            try {
+              // Use the appropriate processor based on storage type
+              if (isS3File) {
+                // Use S3 document processor
+                processedDocument = await processS3Document(
+                  document.filePath,
+                  true, // isS3 = true
+                  document.title,
+                  processingMetadata,
+                );
+              } else {
+                // Determine file type based on extension
+                const fileExt = path.extname(document.filePath).toLowerCase();
+
+                if (fileExt === ".pdf") {
+                  // Process PDF as before for local files
+                  const pdfBuffer = fs.readFileSync(document.filePath);
+                  processedDocument = await processPdf(
+                    pdfBuffer,
+                    document.title,
+                    processingMetadata,
+                  );
+                } else if (
+                  [".docx", ".doc", ".txt", ".rtf", ".odt"].includes(fileExt)
+                ) {
+                  // For text-based documents, read the file and process as text
+                  let documentText = "";
+                  try {
+                    // Basic extraction for text files
+                    if (fileExt === ".txt") {
+                      documentText = fs.readFileSync(document.filePath, "utf8");
+                    } else {
+                      // For other file types, we'll use a basic approach of reading the file
+                      // In a production environment, you might want to use specific libraries
+                      // like mammoth for DOCX, textract, etc.
+                      documentText = `Content extracted from ${document.title}. File type: ${fileExt}`;
+                      console.log(
+                        `Basic text extraction from ${fileExt} file: ${document.filePath}`,
+                      );
+
+                      // If there's any metadata about the file content, include it
+                      if (
+                        document.metadata &&
+                        typeof document.metadata === "object"
+                      ) {
+                        const metadata = document.metadata as Record<
+                          string,
+                          any
+                        >;
+                        if (metadata.extractedText) {
+                          documentText = metadata.extractedText;
+                        }
+                      }
+                    }
+
+                    processedDocument = await processText(
+                      documentText,
+                      `document:${document.title}`,
+                      processingMetadata,
+                    );
+                  } catch (err) {
+                    console.error(
+                      `Error extracting text from ${fileExt} file:`,
+                      err,
+                    );
+                    throw new Error(
+                      `Failed to extract text from ${fileExt} file: ${(err as Error).message}`,
+                    );
+                  }
+                } else {
+                  throw new Error(`Unsupported file extension: ${fileExt}`);
+                }
+              }
+            } catch (error) {
+              console.error(`Error processing document ${document.id}:`, error);
+              const errorMessage = error instanceof Error ? error.message : String(error);
+              throw new Error(
+                `Failed to process document: ${errorMessage}`,
+              );
+            }
+            break;
+
+          case "url":
+            if (!document.sourceUrl) {
+              throw new Error("URL source not found");
+            }
+            processedDocument = await processUrl(
+              document.sourceUrl,
+              processingMetadata,
+            );
+            break;
+
+          case "youtube":
+            if (!document.sourceUrl) {
+              throw new Error("YouTube URL source not found");
+            }
+            console.log(
+              `Processing YouTube video from URL: ${document.sourceUrl}`,
+            );
+            const youtubeResult = await processYouTubeVideo(
+              document,
+              document.sourceUrl,
+              userId,
+              kbId,
+            );
+            // YouTube processing happens in the processYouTubeVideo function
+            // which takes care of updating the document status
+            // CRITICAL FIX: Don't return empty text as this would cause content to be set to null
+            console.log(
+              `Preserving existing YouTube document content for document ${document.id}`,
+            );
+            processedDocument = {
+              text: document.content || "",
+              chunks: [],
+              metadata: {
+                youtubeProcessed: true,
+                preserveContent: true,
+              },
+            };
+            break;
+
+          default:
+            throw new Error(`Unsupported document type: ${sourceType}`);
+        }
+
+        // Update progress to show we're creating embeddings
+        await storage.updateDocument(docId, {
+          processingInfo: {
+            status_message: "Creating embeddings",
+            progress: 60,
+          },
+        });
+
+        // Create embeddings for the processed chunks
+        const embeddingResults = await createAndStoreEmbeddings(
+          userId,
+          kbId,
+          docId.toString(),
+          processedDocument,
+          numericProviderId, // Use the sanitized numeric ID instead of raw providerId
+        );
+
+        // Update progress to show we're finalizing document
+        await storage.updateDocument(docId, {
+          processingInfo: {
+            status_message: "Finalizing document",
+            progress: 80,
+          },
+        });
+
+        // Give Pinecone a moment to index the embeddings
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+
+        // Extract the full document content if available
+        let extractedFullContent = null;
+
+        // For text content, use the original content
+        if (document.sourceType === "text" && document.content) {
+          extractedFullContent = document.content;
+        }
+        // For processed documents with chunks, join all the chunk contents
+        else if (
+          processedDocument.chunks &&
+          processedDocument.chunks.length > 0
+        ) {
+          extractedFullContent = processedDocument.chunks
+            .map((chunk) => chunk.content)
+            .join("\n\n");
+          console.log(
+            `Extracted ${extractedFullContent.length} characters of content from ${processedDocument.chunks.length} chunks`,
+          );
+        }
+
+        // Check if this is a YouTube document with the preserve content flag
+        const isYoutubeDocument = document.sourceType === "youtube";
+        const shouldPreserveContent =
+          processedDocument.metadata &&
+          processedDocument.metadata.preserveContent;
+
+        if (isYoutubeDocument && shouldPreserveContent) {
+          console.log(
+            `CRITICAL FIX::: Finalizing YouTube document ${docId} WITHOUT touching content field to preserve transcript`,
+          );
+
+          // For YouTube documents, don't update the content field to avoid overwriting the transcript
+        const chunkCount = processedDocument.chunks.length;
+        const embeddingCount = embeddingResults.length;
+        
+        // Ensure we have non-zero counts
+        if (chunkCount === 0 || embeddingCount === 0) {
+          console.warn(`WARNING: YouTube document ${docId} has zero chunk_count(${chunkCount}) or embedding_count(${embeddingCount})`);
+        }
+        
+        // Force minimum count to 1 to avoid empty embeddings
+        const finalChunkCount = Math.max(1, chunkCount);
+        const finalEmbeddingCount = Math.max(1, embeddingCount);
+        
+        console.log(`Using final counts for YouTube document ${docId}: chunks=${finalChunkCount}, embeddings=${finalEmbeddingCount}`);
+        
+        await storage.updateDocument(docId, {
+          status: 'processed',
+          // Do NOT include content field here to preserve existing YouTube transcript
+          processingInfo: {
+            status_message: "Processing complete",
+            progress: 100,
+            completed_at: new Date(),
+            chunk_size: 1000,
+            chunk_overlap: 200,
+            chunks: finalChunkCount,
+            embeddings: finalEmbeddingCount
+          },
+          metadata: document.metadata ? {
+            ...document.metadata,
+            chunk_count: finalChunkCount,
+            embedding_count: finalEmbeddingCount,
+            embedding_provider: numericProviderId,
+            isYoutubeDocument: true,
+            youtubeContentPreserved: true,
+            content_extracted: true,
+            extraction_date: new Date().toISOString()
+          } : {
+            chunk_count: finalChunkCount,
+            embedding_count: finalEmbeddingCount,
+            embedding_provider: numericProviderId,
+            isYoutubeDocument: true,
+            youtubeContentPreserved: true,
+            content_extracted: true,
+            extraction_date: new Date().toISOString()
+          },
+          embeddingIds: embeddingResults.map(result => result.id)
+        });
+        } else {
+          console.log(
+            `Test log ${processedDocument.chunks.length}`,
+          );
+          // For all other document types, update with extracted content
+          await storage.updateDocument(docId, {
+            status: "processed",
+            // Store the full extracted content in the document's content field
+            // Sanitize content to remove null bytes that cause PostgreSQL encoding errors
+            content: extractedFullContent ? extractedFullContent.replace(/\0/g, '') : '',
+            processingInfo: {
+              status_message: "Processing complete",
+              progress: 100,
+              completed_at: new Date(),
+              chunk_size: 1000, // Default chunk size
+              chunk_overlap: 200, // Default chunk overlap
+            },
+            metadata: document.metadata
+              ? {
+                  ...document.metadata,
+                  chunk_count: processedDocument.chunks.length,
+                  embedding_count: embeddingResults.length,
+                  embedding_provider: numericProviderId, // Use the sanitized numeric ID
+                  content_extracted: extractedFullContent !== null, // Flag indicating content was extracted
+                  extraction_date: new Date().toISOString(),
+                }
+              : {
+                  chunk_count: processedDocument.chunks.length,
+                  embedding_count: embeddingResults.length,
+                  embedding_provider: numericProviderId, // Use the sanitized numeric ID
+                  content_extracted: extractedFullContent !== null, // Flag indicating content was extracted
+                  extraction_date: new Date().toISOString(),
+                },
+            embeddingIds: embeddingResults.map((result) => result.id),
+          });
+        }
+
+        res.status(200).json({
+          document_id: docId,
+          status: "processed",
+          chunks: processedDocument.chunks.length,
+          embeddings: embeddingResults.length,
+        });
+      } catch (error) {
+        console.error(`Error processing document ${docId}:`, error);
+
+        // Update document with error status
+        await storage.updateDocument(docId, {
+          status: "failed",
+          processingInfo: {
+            error: error instanceof Error ? error.message : String(error),
+            completed_at: new Date(),
+          },
+        });
+
+        res.status(500).json({
+          message: "Failed to process document",
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    },
+  );

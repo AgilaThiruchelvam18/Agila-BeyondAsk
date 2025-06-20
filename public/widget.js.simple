@@ -1,0 +1,59 @@
+/**
+ * BeyondAsk Widget - Simple Debug Version
+ */
+(function() {
+  console.log('BeyondAsk Widget: Script loaded');
+  
+  // Create a simple widget button directly
+  setTimeout(function() {
+    try {
+      console.log('BeyondAsk Widget: Creating test button directly');
+      
+      // Create widget container
+      const container = document.createElement('div');
+      container.id = 'beyond-widget-container';
+      container.style.position = 'fixed';
+      container.style.bottom = '20px';
+      container.style.right = '20px';
+      container.style.zIndex = '999999';
+      
+      // Create button
+      const button = document.createElement('div');
+      button.style.width = '60px';
+      button.style.height = '60px';
+      button.style.borderRadius = '50%';
+      button.style.backgroundColor = '#ff0000'; // Bright red for visibility
+      button.style.display = 'flex';
+      button.style.alignItems = 'center';
+      button.style.justifyContent = 'center';
+      button.style.cursor = 'pointer';
+      button.style.boxShadow = '0 2px 12px rgba(0, 0, 0, 0.2)';
+      button.style.color = 'white';
+      button.style.fontSize = '24px';
+      
+      // Add message icon
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>';
+      
+      // Add click event
+      button.addEventListener('click', function() {
+        alert('BeyondAsk Widget Test - Button works!');
+      });
+      
+      // Add to container and then to document
+      container.appendChild(button);
+      document.body.appendChild(container);
+      
+      console.log('BeyondAsk Widget: Test button added to DOM', container);
+    } catch (err) {
+      console.error('BeyondAsk Widget: Error creating test button', err);
+    }
+  }, 1000);
+  
+  // Simple global function
+  window.beyondWidget = function() {
+    console.log('BeyondWidget called with args:', Array.from(arguments));
+    return {
+      isInitialized: true
+    };
+  };
+})();

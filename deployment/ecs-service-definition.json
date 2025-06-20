@@ -1,0 +1,50 @@
+{
+  "serviceName": "beyondask-api",
+  "cluster": "production-beyondask-cluster",
+  "taskDefinition": "beyondask-backend",
+  "desiredCount": 2,
+  "launchType": "FARGATE",
+  "platformVersion": "LATEST",
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": [
+        "subnet-REPLACE_WITH_PRIVATE_SUBNET_1",
+        "subnet-REPLACE_WITH_PRIVATE_SUBNET_2"
+      ],
+      "securityGroups": [
+        "sg-REPLACE_WITH_ECS_SECURITY_GROUP"
+      ],
+      "assignPublicIp": "DISABLED"
+    }
+  },
+  "loadBalancers": [
+    {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:ACCOUNT_ID:targetgroup/production-beyondask-api-tg/REPLACE_WITH_TARGET_GROUP_ID",
+      "containerName": "beyondask-api",
+      "containerPort": 5000
+    }
+  ],
+  "serviceRegistries": [],
+  "tags": [
+    {
+      "key": "Environment",
+      "value": "production"
+    },
+    {
+      "key": "Application",
+      "value": "BeyondAsk"
+    }
+  ],
+  "enableExecuteCommand": true,
+  "deploymentController": {
+    "type": "ECS"
+  },
+  "deploymentConfiguration": {
+    "maximumPercent": 200,
+    "minimumHealthyPercent": 50,
+    "deploymentCircuitBreaker": {
+      "enable": true,
+      "rollback": true
+    }
+  }
+}

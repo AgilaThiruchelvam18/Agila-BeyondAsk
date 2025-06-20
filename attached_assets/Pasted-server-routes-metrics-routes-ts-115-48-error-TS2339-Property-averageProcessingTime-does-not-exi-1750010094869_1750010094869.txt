@@ -1,0 +1,70 @@
+server/routes/metrics-routes.ts(115,48): error TS2339: Property 'averageProcessingTime' does not exist on type '{ total: number; processed: number; storageUsed: number; failed: number; }'.
+server/routes/metrics-routes.ts(120,32): error TS2339: Property 'tokenUsage' does not exist on type '{ totalRequests: number; averageResponseTime: number; errorRate: number; costThisMonth: number; }'.
+server/routes/metrics-routes.ts(183,32): error TS2339: Property 'apiCalls' does not exist on type '{ totalQueries: number; tokensUsed: number; costThisMonth: number; planUsage: {}; }'.
+server/routes/metrics-routes.ts(184,35): error TS2339: Property 'storageUsed' does not exist on type '{ totalQueries: number; tokensUsed: number; costThisMonth: number; planUsage: {}; }'.
+server/routes/metrics-routes.ts(185,37): error TS2339: Property 'estimatedCost' does not exist on type '{ totalQueries: number; tokensUsed: number; costThisMonth: number; planUsage: {}; }'.
+server/routes/metrics-routes.ts(223,15): error TS2339: Property 'getResponseTimeMetrics' does not exist on type 'IStorage'.
+server/routes/metrics-routes.ts(224,15): error TS2339: Property 'getSentimentAnalysis' does not exist on type 'IStorage'.
+server/routes/metrics-routes.ts(225,15): error TS2339: Property 'getTopQueries' does not exist on type 'IStorage'.
+server/routes/metrics-routes.ts(287,15): error TS2339: Property 'getKnowledgeBasePerformanceMetrics' does not exist on type 'IStorage'.
+server/routes/metrics-routes.ts(289,15): error TS2339: Property 'getKnowledgeBaseQueryAnalytics' does not exist on type 'IStorage'.
+server/routes/metrics-routes.ts(353,15): error TS2339: Property 'getLLMCostMetrics' does not exist on type 'IStorage'.
+server/routes/metrics-routes.ts(354,15): error TS2339: Property 'getLLMPerformanceMetrics' does not exist on type 'IStorage'.
+server/routes/metrics-routes.ts(355,15): error TS2339: Property 'getLLMErrorMetrics' does not exist on type 'IStorage'.
+server/routes/metrics-routes.ts(431,36): error TS2339: Property 'generateUserActivityReport' does not exist on type 'IStorage'.
+server/routes/metrics-routes.ts(434,36): error TS2339: Property 'generateAgentPerformanceReport' does not exist on type 'IStorage'.
+server/routes/metrics-routes.ts(437,36): error TS2339: Property 'generateKnowledgeBaseReport' does not exist on type 'IStorage'.
+server/routes/metrics-routes.ts(440,36): error TS2339: Property 'generateCostAnalysisReport' does not exist on type 'IStorage'.
+server/routes/metrics-routes.ts(445,27): error TS2339: Property 'role' does not exist on type '{ id: number; authId: string; email: string; name: string; picture: string | null; createdAt: Date; }'.
+server/routes/metrics-routes.ts(448,36): error TS2339: Property 'generateSystemHealthReport' does not exist on type 'IStorage'.
+server/routes/metrics-routes.ts(455,39): error TS2339: Property 'saveGeneratedReport' does not exist on type 'IStorage'.
+server/routes/metrics-routes.ts(493,35): error TS2339: Property 'getUserReports' does not exist on type 'IStorage'.
+server/routes/metrics-routes.ts(530,15): error TS2339: Property 'getRealtimeStats' does not exist on type 'IStorage'.
+server/routes/metrics-routes.ts(531,15): error TS2339: Property 'getRecentActivity' does not exist on type 'IStorage'.
+server/routes/metrics-routes.ts(532,15): error TS2339: Property 'getMetricAlerts' does not exist on type 'IStorage'.
+server/routes/metrics-routes.ts(533,15): error TS2339: Property 'getQuickMetrics' does not exist on type 'IStorage'.
+server/routes/subscription-routes.ts(211,20): error TS2339: Property 'price' does not exist on type '{ id: number; name: string; createdAt: Date; updatedAt: Date; description: string; isActive: boolean | null; displayName: string; monthlyPrice: number; annualPrice: number; features: string[] | null; ... 12 more ...; sortOrder: number | null; }'.
+server/routes/subscription-routes.ts(212,22): error TS2339: Property 'currency' does not exist on type '{ id: number; name: string; createdAt: Date; updatedAt: Date; description: string; isActive: boolean | null; displayName: string; monthlyPrice: number; annualPrice: number; features: string[] | null; ... 12 more ...; sortOrder: number | null; }'.
+server/routes/subscription-routes.ts(375,64): error TS2339: Property 'billingCycle' does not exist on type '{ id: number; createdAt: Date; status: string; userId: number; updatedAt: Date; metadata: unknown; planId: number; billingPeriod: string; startDate: string; endDate: string | null; trialEndDate: string | null; ... 5 more ...; usageData: { ...; } | null; }'.
+server/routes/subscription-routes.ts(423,40): error TS2339: Property 'getUsageRecords' does not exist on type 'IStorage'.
+server/routes/subscription-routes.ts(437,21): error TS2339: Property 'limits' does not exist on type '{ id: number; name: string; createdAt: Date; updatedAt: Date; description: string; isActive: boolean | null; displayName: string; monthlyPrice: number; annualPrice: number; features: string[] | null; ... 12 more ...; sortOrder: number | null; }'.
+server/routes/subscription-routes.ts(478,36): error TS2339: Property 'billingCycle' does not exist on type '{ id: number; createdAt: Date; status: string; userId: number; updatedAt: Date; metadata: unknown; planId: number; billingPeriod: string; startDate: string; endDate: string | null; trialEndDate: string | null; ... 5 more ...; usageData: { ...; } | null; }'.
+server/routes/subscription-routes.ts(487,32): error TS2339: Property 'transactionId' does not exist on type '{ id: number; createdAt: Date; status: string; description: string | null; metadata: unknown; paymentProvider: string; paymentProviderId: string | null; subscriptionId: number; amount: number; currency: string; paymentMethod: string | null; }'.
+server/routes/subscription-routes.ts(489,30): error TS2339: Property 'processedAt' does not exist on type '{ id: number; createdAt: Date; status: string; description: string | null; metadata: unknown; paymentProvider: string; paymentProviderId: string | null; subscriptionId: number; amount: number; currency: string; paymentMethod: string | null; }'.
+server/routes/team-routes.ts(267,36): error TS2339: Property 'getUserById' does not exist on type 'IStorage'.
+server/routes/team-routes.ts(369,37): error TS2339: Property 'getUserById' does not exist on type 'IStorage'.
+server/routes/team-routes.ts(555,28): error TS2339: Property 'id' does not exist on type '{ status: string; userId: number; updatedAt: Date; role: string; teamId: number; joinedAt: Date; }'.
+server/routes/user-routes.ts(276,19): error TS2339: Property 'preferences' does not exist on type '{ id: number; authId: string; email: string; name: string; picture: string | null; createdAt: Date; }'.
+server/routes/user-routes.ts(277,27): error TS2339: Property 'preferences' does not exist on type '{ id: number; authId: string; email: string; name: string; picture: string | null; createdAt: Date; }'.
+server/routes/user-routes.ts(278,22): error TS2339: Property 'language' does not exist on type '{ id: number; authId: string; email: string; name: string; picture: string | null; createdAt: Date; }'.
+server/routes/user-routes.ts(279,22): error TS2339: Property 'timezone' does not exist on type '{ id: number; authId: string; email: string; name: string; picture: string | null; createdAt: Date; }'.
+server/routes/user-routes.ts(280,32): error TS2339: Property 'preferences' does not exist on type '{ id: number; authId: string; email: string; name: string; picture: string | null; createdAt: Date; }'.
+server/routes/user-routes.ts(281,22): error TS2339: Property 'preferences' does not exist on type '{ id: number; authId: string; email: string; name: string; picture: string | null; createdAt: Date; }'.
+server/routes/user-routes.ts(282,25): error TS2339: Property 'preferences' does not exist on type '{ id: number; authId: string; email: string; name: string; picture: string | null; createdAt: Date; }'.
+server/routes/user-routes.ts(312,23): error TS2339: Property 'preferences' does not exist on type '{ id: number; authId: string; email: string; name: string; picture: string | null; createdAt: Date; }'.
+server/routes/user-routes.ts(439,19): error TS2339: Property 'deleteUser' does not exist on type 'IStorage'.
+server/routes/user-routes.ts(473,15): error TS2339: Property 'getUserAgents' does not exist on type 'IStorage'.
+server/routes/user-routes.ts(483,27): error TS2339: Property 'preferences' does not exist on type '{ id: number; authId: string; email: string; name: string; picture: string | null; createdAt: Date; }'.
+server/routes/user-routes.ts(484,24): error TS2339: Property 'timezone' does not exist on type '{ id: number; authId: string; email: string; name: string; picture: string | null; createdAt: Date; }'.
+server/routes/user-routes.ts(485,24): error TS2339: Property 'language' does not exist on type '{ id: number; authId: string; email: string; name: string; picture: string | null; createdAt: Date; }'.
+server/routes/user-routes.ts(487,25): error TS2339: Property 'updatedAt' does not exist on type '{ id: number; authId: string; email: string; name: string; picture: string | null; createdAt: Date; }'.
+server/routes/widget-routes.ts(305,17): error TS2339: Property 'configuration' does not exist on type '{ id: string; name: string; createdAt: Date; userId: string | null; agentId: string | null; config: { theme: { primaryColor: string; textColor: string; backgroundColor: string; }; position: "bottom-right" | ... 2 more ... | "top-left"; size: "small" | ... 1 more ... | "large"; welcomeMessage: string; widgetTitle: st...'.
+server/routes/widget-routes.ts(347,37): error TS2339: Property 'getWidgetAnalytics' does not exist on type 'IStorage'.
+server/services/document-processor.ts(50,45): error TS2339: Property 'mimeType' does not exist on type '{}'.
+server/services/llm.ts(214,49): error TS2339: Property 'rows' does not exist on type 'never'.
+server/services/llm.ts(234,44): error TS2339: Property 'rows' does not exist on type 'never'.
+server/services/llm.ts(252,44): error TS2339: Property 'rows' does not exist on type 'never'.
+server/storage.ts(1162,36): error TS2339: Property 'resourceType' does not exist on type '{ id: number; createdAt: Date; userId: number; ipAddress: string | null; userAgent: string | null; teamId: number; action: string; entityType: string; entityId: string; details: unknown; }'.
+server/storage.ts(1162,82): error TS2339: Property 'resourceId' does not exist on type '{ id: number; createdAt: Date; userId: number; ipAddress: string | null; userAgent: string | null; teamId: number; action: string; entityType: string; entityId: string; details: unknown; }'.
+server/storage.ts(1299,29): error TS2339: Property 'id' does not exist on type '{ name: string; config: { theme: { primaryColor: string; textColor: string; backgroundColor: string; }; position: string; size: string; welcomeMessage: string; widgetTitle: string; }; userId?: string | null | undefined; agentId?: string | ... 1 more ... | undefined; active?: boolean | ... 1 more ... | undefined; all...'.
+server/storage.ts(1301,36): error TS2339: Property 'publicKey' does not exist on type '{ name: string; config: { theme: { primaryColor: string; textColor: string; backgroundColor: string; }; position: string; size: string; welcomeMessage: string; widgetTitle: string; }; userId?: string | null | undefined; agentId?: string | ... 1 more ... | undefined; active?: boolean | ... 1 more ... | undefined; all...'.
+server/storage.ts(1302,36): error TS2339: Property 'secretKey' does not exist on type '{ name: string; config: { theme: { primaryColor: string; textColor: string; backgroundColor: string; }; position: string; size: string; welcomeMessage: string; widgetTitle: string; }; userId?: string | null | undefined; agentId?: string | ... 1 more ... | undefined; active?: boolean | ... 1 more ... | undefined; all...'.
+server/storage.ts(1681,60): error TS2339: Property 'split' does not exist on type '{}'.
+server/storage.ts(1705,60): error TS2339: Property 'split' does not exist on type '{}'.
+server/storage.ts(1727,60): error TS2339: Property 'split' does not exist on type '{}'.
+server/test-token-tracking.ts(43,65): error TS2339: Property 'rows' does not exist on type 'RowList<Record<string, unknown>[]>'.
+server/test-token-tracking.ts(71,63): error TS2339: Property 'rows' does not exist on type 'RowList<Record<string, unknown>[]>'.
+server/test-token-tracking.ts(74,23): error TS2339: Property 'rows' does not exist on type 'RowList<Record<string, unknown>[]>'.
+server/test-token-tracking.ts(74,49): error TS2339: Property 'rows' does not exist on type 'RowList<Record<string, unknown>[]>'.
+server/test-token-tracking.ts(75,36): error TS2339: Property 'rows' does not exist on type 'RowList<Record<string, unknown>[]>'.
+server/test-token-tracking.ts(76,34): error TS2339: Property 'rows' does not exist on type 'RowList<Record<string, unknown>[]>'.

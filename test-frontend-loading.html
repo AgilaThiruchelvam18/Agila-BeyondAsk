@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Frontend Loading Test</title>
+</head>
+<body>
+    <h1>Testing Frontend Loading</h1>
+    <div id="test-result"></div>
+    
+    <script>
+        // Test if the main page loads properly
+        fetch('/')
+            .then(response => response.text())
+            .then(html => {
+                const hasRoot = html.includes('<div id="root">');
+                const hasScript = html.includes('/src/main.tsx');
+                const hasViteClient = html.includes('/@vite/client');
+                
+                document.getElementById('test-result').innerHTML = `
+                    <p>Root div present: ${hasRoot}</p>
+                    <p>Main script present: ${hasScript}</p>
+                    <p>Vite client present: ${hasViteClient}</p>
+                    <p>Status: ${hasRoot && hasScript && hasViteClient ? 'PASS' : 'FAIL'}</p>
+                `;
+            })
+            .catch(error => {
+                document.getElementById('test-result').innerHTML = `<p>Error: ${error.message}</p>`;
+            });
+    </script>
+</body>
+</html>

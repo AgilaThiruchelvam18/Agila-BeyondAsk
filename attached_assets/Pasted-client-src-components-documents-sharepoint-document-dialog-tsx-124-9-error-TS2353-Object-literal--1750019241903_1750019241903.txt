@@ -1,0 +1,30 @@
+client/src/components/documents/sharepoint-document-dialog.tsx(124,9): error TS2353: Object literal may only specify known properties, and 'body' does not exist in type 'AxiosRequestConfig<any>'.
+
+client/src/components/documents/sharepoint-document-dialog.tsx(299,9): error TS2353: Object literal may only specify known properties, and 'body' does not exist in type 'AxiosRequestConfig<any>'.
+
+client/src/components/knowledge-bases/delete-knowledge-base-dialog.tsx(173,13): error TS2322: Type 'boolean | null' is not assignable to type 'boolean | undefined'.
+  Type 'null' is not assignable to type 'boolean | undefined'.
+
+client/src/components/ui/sidebar.tsx(6,10): error TS2724: '"@/hooks/use-mobile"' has no exported member named 'useIsMobile'. Did you mean 'useMobile'?
+
+client/src/components/ui/tag-input.tsx(71,30): error TS2322: Type '"ghost"' is not assignable to type '"default" | "success" | "destructive" | "outline" | "secondary" | "warning" | "info" | null | undefined'.
+
+client/src/pages/contacts.tsx(320,23): error TS2322: Type 'Dispatch<SetStateAction<Date | null>>' is not assignable to type 'SelectSingleEventHandler'.
+  Types of parameters 'value' and 'day' are incompatible.
+    Type 'Date | undefined' is not assignable to type 'SetStateAction<Date | null>'.
+      Type 'undefined' is not assignable to type 'SetStateAction<Date | null>'.
+
+client/src/pages/contacts.tsx(343,23): error TS2322: Type 'Dispatch<SetStateAction<Date | null>>' is not assignable to type 'SelectSingleEventHandler'.
+  Types of parameters 'value' and 'day' are incompatible.
+    Type 'Date | undefined' is not assignable to type 'SetStateAction<Date | null>'.
+      Type 'undefined' is not assignable to type 'SetStateAction<Date | null>'.
+
+client/src/pages/teams.tsx(61,5): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(options: DefinedInitialDataOptions<any, Error, any, string[]>, queryClient?: QueryClient | undefined): DefinedUseQueryResult<any, Error>', gave the following error.
+    Object literal may only specify known properties, and 'onError' does not exist in type 'DefinedInitialDataOptions<any, Error, any, string[]>'.
+  Overload 2 of 3, '(options: UndefinedInitialDataOptions<any, Error, any, string[]>, queryClient?: QueryClient | undefined): UseQueryResult<any, Error>', gave the following error.
+    Object literal may only specify known properties, and 'onError' does not exist in type 'UndefinedInitialDataOptions<any, Error, any, string[]>'.
+  Overload 3 of 3, '(options: UseQueryOptions<any, Error, any, string[]>, queryClient?: QueryClient | undefined): UseQueryResult<any, Error>', gave the following error.
+    Object literal may only specify known properties, and 'onError' does not exist in type 'UseQueryOptions<any, Error, any, string[]>'.
+
+client/src/pages/teams.tsx(61,15): error TS7006: Parameter 'err' implicitly has an 'any' type.

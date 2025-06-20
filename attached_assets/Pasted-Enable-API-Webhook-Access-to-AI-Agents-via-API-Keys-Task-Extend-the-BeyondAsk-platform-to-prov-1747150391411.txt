@@ -1,0 +1,112 @@
+Enable API & Webhook Access to AI Agents via API Keys
+🟦 Task:
+Extend the BeyondAsk platform to provide secure API access to AI agents through user-generated API keys and expose individual webhook endpoints per agent to support integrations with tools like Zapier, n8n, and custom webhooks.
+
+🔐 Authentication
+Implement an API key management system per user or team.
+
+Users must be able to:
+
+Generate and label API keys
+
+Revoke or regenerate keys
+
+Monitor API usage (optional)
+
+API keys must be securely hashed and stored
+
+Keys must be passed via Authorization: Bearer <API_KEY> in requests
+
+🌐 Agent Interaction API (Core Endpoint)
+📌 Endpoint
+http
+Copy
+Edit
+POST /api/v1/agents/:agentId/chat
+Headers:
+  Authorization: Bearer <API_KEY>
+Body:
+{
+  "message": "Write a follow-up email to a lead who didn’t respond",
+  "conversationId": "xyz789",           // Optional: for memory
+  "metadata": { "source": "zapier" }    // Optional: custom tracking
+}
+✅ Expected JSON Response
+json
+Copy
+Edit
+{
+  "reply": "Just checking in — let me know if you had a chance to review our proposal.",
+  "confidence": 0.87,
+  "agentName": "Follow-Up Email Writer"
+}
+🔁 Per-Agent Webhook Endpoint
+Each predefined or user-created agent must expose a dedicated, shareable webhook URL:
+
+📌 Webhook Format
+http
+Copy
+Edit
+POST https://yourdomain.com/api/v1/agents/:agentId/webhook
+Headers:
+  Authorization: Bearer <API_KEY>
+Body:
+{
+  "message": "Write a product announcement for our new feature launch",
+  "userId": "abc123",     // Optional for logging
+  "conversationId": "def456" // Optional for memory
+}
+✅ Features
+Does not require UI login (works with automation tools)
+
+Responds with same structure as main chat API
+
+Can be used in:
+
+Zapier Webhooks → Custom Request block
+
+n8n → HTTP Request node
+
+Airtable scripts, CRMs, custom workflows
+
+Optional parameters: conversationId, metadata, userId
+
+Should still respect:
+
+promptTemplate
+
+rules
+
+confidenceThreshold
+
+fallbackMessage
+
+🧩 Developer Portal / Settings Page (Optional UI)
+Let users:
+
+View list of their agents and copy agent webhook URLs
+
+Generate and manage API keys
+
+Test API requests with sample payloads
+
+See usage stats (calls per key, errors, etc.)
+
+🛡️ Security & Rate Limiting
+Rate limit per API key (configurable)
+
+Prevent one team from accessing another’s agents
+
+Log all requests with timestamps and originating IPs (optional)
+
+📊 Optional Analytics (Future Feature)
+Allow users to view:
+
+Top agents used via API
+
+Request success/failure breakdowns
+
+Average response time
+
+Agent-wise usage trends
+

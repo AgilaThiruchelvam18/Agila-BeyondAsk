@@ -1,0 +1,49 @@
+Enhance the conversational message feature in our AI chat interface by implementing memory management using a combination of recent message retention and summarization.
+
+Tech stack: React (frontend), Node.js or Python (backend), Pinecone (vector DB), OpenAI/Claude for LLM.
+
+🔧 Requirements:
+
+1. **Message Window Handling**
+   - Maintain the last 3–5 user-assistant messages in full.
+   - Use this as the "active window" for current prompt context.
+   - These messages should be passed with each new query.
+
+2. **Conversation Summarization**
+   - Develop a backend endpoint (Node.js or Python) that accepts the older message history (excluding the recent 3–5).
+   - Use an LLM to generate a summary that captures:
+     - User's objective/goals
+     - Key instructions
+     - Tone/voice/style
+     - Important decisions/preferences
+   - Example LLM prompt:
+
+     ```
+     Summarize the following conversation. Focus on important instructions, goals, and key decisions. Ignore greetings or filler.
+     Conversation:
+     {{message_history}}
+     ```
+
+   - Save this as `conversation_summary` in memory or DB (optional: persist in Pinecone for long-term storage).
+
+3. **Prompt Construction**
+   - When sending a new message to the LLM:
+     - Inject the `conversation_summary` at the beginning.
+     - Append the 3–5 most recent messages in their original form.
+     - Add the current user query.
+
+4. **Automatic Summary Updates**
+   - After every 10–15 total messages, regenerate the conversation summary with all previous messages (excluding current window).
+   - Overwrite the existing `conversation_summary`.
+
+5. **Frontend Integration**
+   - Add a toggle under **AI Agent Settings** to enable/disable memory-based responses.
+   - If disabled, only send current user input and 1–2 prior messages.
+
+6. **Optional Enhancement:**
+   - Store timestamped summaries in Pinecone for session-level search and retrieval.
+   - Allow users to view and edit their memory summary in the UI.
+
+🎯 Goal:
+Make the AI assistant capable of maintaining coherent, goal-aware conversations even across longer threads, despite token limitations.
+

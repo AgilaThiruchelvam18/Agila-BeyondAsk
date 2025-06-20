@@ -1,0 +1,126 @@
+<!-- Pricing Section -->
+  <section id="pricing" class="py-20 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">Flexible Pricing Plans</h2>
+        <p class="text-text-secondary text-lg max-w-2xl mx-auto">
+          Choose the perfect plan for your business needs with transparent pricing and no hidden fees.
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Starter Plan -->
+        <div class="pricing-card rounded-lg overflow-hidden relative">
+          <div class="p-6">
+            <h3 class="text-xl font-semibold mb-2">Starter</h3>
+            <p class="text-text-secondary mb-6">Perfect for small teams and startups</p>
+            <div class="mb-6">
+              <span class="text-4xl font-bold">$49</span>
+              <span class="text-text-secondary">/month</span>
+            </div>
+            <ul class="space-y-3 mb-8">
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-accent mr-3 flex-shrink-0"></div>
+                <span>Up to 5 users</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-accent mr-3 flex-shrink-0"></div>
+                <span>10 automated workflows</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-accent mr-3 flex-shrink-0"></div>
+                <span>Basic analytics</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-accent mr-3 flex-shrink-0"></div>
+                <span>Email support</span>
+              </li>
+            </ul>
+            <button class="btn-primary w-full rounded-lg py-3 font-medium text-white">
+              Get Started
+            </button>
+          </div>
+        </div>
+        
+        <!-- Professional Plan -->
+        <div class="pricing-card rounded-lg overflow-hidden relative border-2 border-primary">
+          <div class="bg-primary text-center py-1 text-sm font-medium text-white">
+            Most Popular
+          </div>
+          <div class="p-6 pt-10">
+            <h3 class="text-xl font-semibold mb-2">Professional</h3>
+            <p class="text-text-secondary mb-6">Ideal for growing businesses</p>
+            <div class="mb-6">
+              <span class="text-4xl font-bold">$149</span>
+              <span class="text-text-secondary">/month</span>
+            </div>
+            <ul class="space-y-3 mb-8">
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-secondary mr-3 flex-shrink-0"></div>
+                <span>Up to 20 users</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-secondary mr-3 flex-shrink-0"></div>
+                <span>Unlimited workflows</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-secondary mr-3 flex-shrink-0"></div>
+                <span>Advanced analytics</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-secondary mr-3 flex-shrink-0"></div>
+                <span>Priority support</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-secondary mr-3 flex-shrink-0"></div>
+                <span>Custom integrations</span>
+              </li>
+            </ul>
+            <button class="btn-primary w-full rounded-lg py-3 font-medium text-white">
+              Get Started
+            </button>
+          </div>
+        </div>
+        
+        <!-- Enterprise Plan -->
+        <div class="pricing-card rounded-lg overflow-hidden relative">
+          <div class="p-6">
+            <h3 class="text-xl font-semibold mb-2">Enterprise</h3>
+            <p class="text-text-secondary mb-6">For large organizations</p>
+            <div class="mb-6">
+              <span class="text-4xl font-bold">Custom</span>
+            </div>
+            <ul class="space-y-3 mb-8">
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-highlight mr-3 flex-shrink-0"></div>
+                <span>Unlimited users</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-highlight mr-3 flex-shrink-0"></div>
+                <span>Unlimited workflows</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-highlight mr-3 flex-shrink-0"></div>
+                <span>Custom analytics dashboards</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-highlight mr-3 flex-shrink-0"></div>
+                <span>24/7 dedicated support</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-highlight mr-3 flex-shrink-0"></div>
+                <span>Enterprise-level security</span>
+              </li>
+              <li class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-highlight mr-3 flex-shrink-0"></div>
+                <span>On-premise option</span>
+              </li>
+            </ul>
+            <button class="btn-secondary w-full rounded-lg py-3 font-medium">
+              Contact Sales
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>

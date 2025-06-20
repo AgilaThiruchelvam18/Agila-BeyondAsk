@@ -1,0 +1,396 @@
+Document creation request body: {
+  title: 'Test 31',
+  description: '',
+  sourceType: 'youtube',
+  sourceUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+  metadata: { custom_fields: {} },
+  tags: []
+}
+Document data to be inserted: {
+  knowledgeBaseId: 26,
+  userId: 4,
+  title: 'Test 31',
+  description: '',
+  status: 'pending',
+  sourceType: 'youtube',
+  sourceUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+  metadata: { custom_fields: {} },
+  tags: [],
+  processingInfo: {
+    status_message: 'Awaiting processing',
+    progress: 0,
+    started_at: 2025-05-19T17:18:55.660Z
+  }
+}
+Creating document with isS3: undefined data: {
+  title: 'Test 31',
+  content: null,
+  sourceType: 'youtube',
+  knowledgeBaseId: 26,
+  status: 'pending',
+  userId: 4,
+  description: null,
+  metadata: { custom_fields: {} },
+  sourceUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+  fileSize: null,
+  filePath: null,
+  isS3: false,
+  updatedAt: 2025-05-19T17:18:55.661Z
+}
+Found existing user with ID: 4
+Getting active subscription for user 4 with status 'active' and valid end date
+5:18:55 PM [express] GET /api/knowledge-bases/26/documents 200 in 194ms :: [{"id":130,"knowledgeBase…
+No active subscription found for user 4. Using default limits.
+5:18:55 PM [express] POST /api/knowledge-bases/26/documents 201 in 399ms :: {"id":151,"knowledgeBase…
+Token extracted from authorization header
+Decoded payload: {"iss":"https://dev-d8wu1dtr5o6osbml.us.auth0.com/","sub":"auth0|67eecef07cf3c1e3ac1bb754","aud":["https://dev-d8wu1dtr5o6osbml.us.auth0.com/api/v2/","https://dev-d8wu1dtr5o6osbml.us.auth0.com/userinfo"],"iat":1747670033,"exp":1747677233,"scope":"openid profile email","azp":"aVT07QHAv8rCCMjloxScp4up0EkxRYgr"}
+Token verified successfully, subject: auth0|67eecef07cf3c1e3ac1bb754
+Found existing user with ID: 4
+Updating document 151 with data: {
+  status: 'processing',
+  processingInfo: {
+    status_message: 'Starting document processing',
+    progress: 10,
+    started_at: 2025-05-19T17:18:56.207Z
+  },
+  updatedAt: 2025-05-19T17:18:56.207Z
+}
+Invalid, empty, or NaN providerId: undefined, using default ID: 1
+Updating document 151 with data: {
+  status: 'processing',
+  processingInfo: { started_at: 2025-05-19T17:18:56.249Z },
+  updatedAt: 2025-05-19T17:18:56.249Z
+}
+Processing document: { id: 151, title: 'Test 31', sourceType: 'youtube' }
+Knowledge base has 0 custom fields defined
+Document has custom fields metadata: {}
+Processing document with sourceType: youtube
+Document file path: null
+Updating document 151 with data: {
+  processingInfo: { status_message: 'Extracting document content', progress: 30 },
+  updatedAt: 2025-05-19T17:18:56.293Z
+}
+Processing YouTube video from URL: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+Processing YouTube video for document ID 151: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+Updating document 151 with data: {
+  status: 'processing',
+  processingInfo: { started_at: '2025-05-19T17:18:56.347Z', step: 'downloading' },
+  updatedAt: 2025-05-19T17:18:56.347Z
+}
+Calling youtubeService.processYouTubeUrl for: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+5:18:56 PM [youtube-service] Processing YouTube URL via external service: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+5:18:56 PM [youtube-service] Using API URL: https://d6081979-14b6-491c-a89e-97bb41c5c0e8-00-2mdjtxzqllnzz.kirk.replit.dev/api/youtube/process
+5:18:56 PM [youtube-service] Sending request to AI service with URL: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+5:18:58 PM [express] GET /api/knowledge-bases/26/documents/150 200 in 3ms
+5:19:02 PM [youtube-service] YouTube API response received, status: OK
+5:19:02 PM [youtube-service] Received transcript (2089 characters)
+5:19:02 PM [youtube-service] First 100 chars: [♪♪♪] ♪ We're no strangers to love ♪ ♪ You know the rules
+and so do I ♪ ♪ A full commitment's
+what I...
+5:19:02 PM [youtube-service] Received metadata: {"author":"Rick Astley","length_seconds":212,"publish_date":"20091025","source_url":"https://www.youtube.com/watch?v=dQw4w9WgXcQ","thumbnail_url":"https://i.ytimg.com/vi_webp/dQw4w9WgXcQ/maxresdefault.webp","title":"Rick Astley - Never Gonna Give You Up (Official Music Video)","video_id":"dQw4w9WgXcQ","views":1656378839}
+5:19:02 PM [youtube-service] Successfully processed YouTube video and returned result
+Result received from youtubeService.processYouTubeUrl
+Successfully extracted text from YouTube video: https://www.youtube.com/watch?v=dQw4w9WgXcQ (2089 characters)
+First 200 characters of text: [♪♪♪] ♪ We're no strangers to love ♪ ♪ You know the rules
+and so do I ♪ ♪ A full commitment's
+what I'm thinking of ♪ ♪ You wouldn't get this
+from any other guy ♪ ♪ I just wanna tell you
+how I'm feelin...
+Updating document 151 with extracted text and metadata
+Document update data: {"id":151,"content_length":2089,"metadata_keys":["custom_fields","youtube"]}
+Updating document 151 with data: {
+  content: "[♪♪♪] ♪ We're no strangers to love ♪ ♪ You know the rules\n" +
+    "and so do I ♪ ♪ A full commitment's\n" +
+    "what I'm thinking of ♪ ♪ You wouldn't get this\n" +
+    'from any other guy ♪ ♪ I just wanna tell you\n' +
+    "how I'm feeling ♪ ♪ Gotta make you understand ♪ ♪ Never gonna give you up ♪ ♪ Never gonna let you down ♪ ♪ Never gonna run around\n" +
+    'and desert you ♪ ♪ Never gonna make you cry ♪ ♪ Never gonna say goodbye ♪ ♪ Never gonna tell a lie\n' +
+    "and hurt you ♪ ♪ We've known each other\n" +
+    "for so long ♪ ♪ Your heart's been aching\n" +
+    "but you're too shy to say it ♪ ♪ Inside we both know\n" +
+    "what's been going ♪ ♪ We know the game\n" +
+    "and we're gonna play it ♪ ♪ And if you ask me\n" +
+    "how I'm feeling ♪ ♪ Don't tell me\n" +
+    "you're too blind to see ♪ ♪ Never gonna give you up ♪ ♪ Never gonna let you down ♪ ♪ Never gonna run around\n" +
+    'and desert you ♪ ♪ Never gonna make you cry ♪ ♪ Never gonna say goodbye ♪ ♪ Never gonna tell a lie\n' +
+    'and hurt you ♪ ♪ Never gonna give you up ♪ ♪ Never gonna let you down ♪ ♪ Never gonna run around\n' +
+    'and desert you ♪ ♪ Never gonna make you cry ♪ ♪ Never gonna say goodbye ♪ ♪ Never gonna tell a lie\n' +
+    'and hurt you ♪ ♪ (Ooh, give you up) ♪ ♪ (Ooh, give you up) ♪ ♪ Never gonna give,\n' +
+    'never gonna give ♪ ♪ (Give you up) ♪ ♪ Never gonna give,\n' +
+    "never gonna give ♪ ♪ (Give you up) ♪ ♪ We've known each other\n" +
+    "for so long ♪ ♪ Your heart's been aching\n" +
+    "but you're too shy to say it ♪ ♪ Inside we both know\n" +
+    "what's been going ♪ ♪ We know the game\n" +
+    "and we're gonna play it ♪ ♪ I just wanna tell you\n" +
+    "how I'm feeling ♪ ♪ Gotta make you understand ♪ ♪ Never gonna give you up ♪ ♪ Never gonna let you down ♪ ♪ Never gonna run around\n" +
+    'and desert you ♪ ♪ Never gonna make you cry ♪ ♪ Never gonna say goodbye ♪ ♪ Never gonna tell a lie\n' +
+    'and hurt you ♪ ♪ Never gonna give you up ♪ ♪ Never gonna let you down ♪ ♪ Never gonna run around\n' +
+    'and desert you ♪ ♪ Never gonna make you cry ♪ ♪ Never gonna say goodbye ♪ ♪ Never gonna tell a lie\n' +
+    'and hurt you ♪ ♪ Never gonna give you up ♪ ♪ Never gonna let you down ♪ ♪ Never gonna run around\n' +
+    'and desert you ♪ ♪ Never gonna make you cry ♪ ♪ Never gonna say goodbye ♪ ♪ Never gonna tell a lie\n' +
+    'and hurt you ♪',
+  metadata: {
+    custom_fields: {},
+    youtube: {
+      author: 'Rick Astley',
+      length_seconds: 212,
+      publish_date: '20091025',
+      source_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      thumbnail_url: 'https://i.ytimg.com/vi_webp/dQw4w9WgXcQ/maxresdefault.webp',
+      title: 'Rick Astley - Never Gonna Give You Up (Official Music Video)',
+      video_id: 'dQw4w9WgXcQ',
+      views: 1656378839
+    }
+  },
+  processingInfo: { step: 'processing_text', text_length: 2089 },
+  updatedAt: 2025-05-19T17:19:02.156Z
+}
+Document update result: Success
+Processing text from youtube:Test 31, length: 2089 characters
+Updating document 151 with data: {
+  metadata: {
+    youtube: {
+      title: 'Rick Astley - Never Gonna Give You Up (Official Music Video)',
+      views: 1656378839,
+      author: 'Rick Astley',
+      video_id: 'dQw4w9WgXcQ',
+      source_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      publish_date: '20091025',
+      thumbnail_url: 'https://i.ytimg.com/vi_webp/dQw4w9WgXcQ/maxresdefault.webp',
+      length_seconds: 212
+    },
+    custom_fields: {},
+    chunk_count: 3
+  },
+  processingInfo: { step: 'generating_embeddings', text_length: 2089, chunks: 3 },
+  updatedAt: 2025-05-19T17:19:02.266Z
+}
+Creating embeddings for document 151 with 3 chunks
+Using normalized values: userId=4, knowledgeBaseId=26, namespace=user-4-kb-26
+Using numeric provider ID: 1
+Normalized providerId: 1 for embeddings
+Using numeric provider ID: 1
+Generating embeddings with values - userId: 4 (number), providerId: 1 (number)
+Using numeric provider ID: 1
+Querying database with values - userId: 4 (number), providerId: 1 (number)
+Using system-level OpenAI API key from environment
+5:19:02 PM [express] GET /api/knowledge-bases/26/documents/150 200 in 3ms
+Updated last_used timestamp for API key 5
+Embedding API Response Status: 200
+Has token_usage field: false
+📊 EMBEDDING TOKEN COUNT: 316 (source: usage.total_tokens)
+🔍 Using API key type for token tracking: user
+Using provider slug from provider object: openai
+🔍 DEBUG provider info for embedding: {"providerId":1,"providerFromParam":"openai","keyProviderId":1,"resolvedName":"openai"}
+
+📊 TRACKING LLM TOKEN USAGE
+  User ID: 4
+  Tokens: 316
+  Provider: openai
+  Model: text-embedding-3-small
+  Key Type: user
+  Source: embedding
+
+🔍 DEBUG: Tracking token usage: 316 tokens for model text-embedding-3-small
+🔍 DEBUG: Token usage details:
+- Provider: openai
+- Model: text-embedding-3-small
+- Key Type: user
+- User ID: 4 (type: number)
+    
+🔍 DEBUG: Database connection test: [{"test":1}]
+🔍 DEBUG: daily_usage_metrics table exists: [{"table_exists":true}]
+🔍 DEBUG: Using direct SQL insertion with userId: 4
+🔍 DEBUG: Using source "embedding" for token tracking
+🔍 DEBUG: Existing metric check: [{"id":17,"metric_value":23907}]
+🔍 DEBUG: Provider before JSON: openai (type: string)
+🔍 DEBUG: Metadata being stored: {"tokenType":"total","provider":"openai","model":"text-embedding-3-small","keyType":"user"}
+🔍 DEBUG: Updating existing metric ID 17 with current value 23907
+🔍 DEBUG: Update result: [{"id":17,"user_id":4,"team_id":null,"date":"2025-05-19","metric_type":"llm_tokens_used","metric_value":24223,"region":null,"storage_type":null,"source":"embedding","metadata":{"model":"text-embedding-3-small","keyType":"user","provider":"openai","tokenType":"total"},"created_at":"2025-05-19 09:18:11.682464","updated_at":"2025-05-19 17:19:04.779646"}]
+✅ SUCCESS: Tracked LLM usage metric:
+ID: 17
+Date: 2025-05-19T00:00:00.000Z
+Tokens: 316
+Provider: openai
+Model: text-embedding-3-small
+Key Type: user
+        
+✅ Successfully tracked 316 embedding tokens for user 4
+Created embedding a5e19aef-942c-4410-aa9c-034db0475d5f for chunk 1/3
+Using numeric provider ID: 1
+Generating embeddings with values - userId: 4 (number), providerId: 1 (number)
+Using numeric provider ID: 1
+Querying database with values - userId: 4 (number), providerId: 1 (number)
+Using system-level OpenAI API key from environment
+Updated last_used timestamp for API key 5
+Embedding API Response Status: 200
+Has token_usage field: false
+📊 EMBEDDING TOKEN COUNT: 324 (source: usage.total_tokens)
+🔍 Using API key type for token tracking: user
+Using provider slug from provider object: openai
+🔍 DEBUG provider info for embedding: {"providerId":1,"providerFromParam":"openai","keyProviderId":1,"resolvedName":"openai"}
+
+📊 TRACKING LLM TOKEN USAGE
+  User ID: 4
+  Tokens: 324
+  Provider: openai
+  Model: text-embedding-3-small
+  Key Type: user
+  Source: embedding
+
+🔍 DEBUG: Tracking token usage: 324 tokens for model text-embedding-3-small
+🔍 DEBUG: Token usage details:
+- Provider: openai
+- Model: text-embedding-3-small
+- Key Type: user
+- User ID: 4 (type: number)
+    
+🔍 DEBUG: Database connection test: [{"test":1}]
+🔍 DEBUG: daily_usage_metrics table exists: [{"table_exists":true}]
+🔍 DEBUG: Using direct SQL insertion with userId: 4
+🔍 DEBUG: Using source "embedding" for token tracking
+🔍 DEBUG: Existing metric check: [{"id":17,"metric_value":24223}]
+🔍 DEBUG: Provider before JSON: openai (type: string)
+🔍 DEBUG: Metadata being stored: {"tokenType":"total","provider":"openai","model":"text-embedding-3-small","keyType":"user"}
+🔍 DEBUG: Updating existing metric ID 17 with current value 24223
+🔍 DEBUG: Update result: [{"id":17,"user_id":4,"team_id":null,"date":"2025-05-19","metric_type":"llm_tokens_used","metric_value":24547,"region":null,"storage_type":null,"source":"embedding","metadata":{"model":"text-embedding-3-small","keyType":"user","provider":"openai","tokenType":"total"},"created_at":"2025-05-19 09:18:11.682464","updated_at":"2025-05-19 17:19:05.623708"}]
+✅ SUCCESS: Tracked LLM usage metric:
+ID: 17
+Date: 2025-05-19T00:00:00.000Z
+Tokens: 324
+Provider: openai
+Model: text-embedding-3-small
+Key Type: user
+        
+✅ Successfully tracked 324 embedding tokens for user 4
+Created embedding cf7a5912-0b13-484c-b5cf-1dd791da5d7c for chunk 2/3
+Using numeric provider ID: 1
+Generating embeddings with values - userId: 4 (number), providerId: 1 (number)
+Using numeric provider ID: 1
+Querying database with values - userId: 4 (number), providerId: 1 (number)
+Using system-level OpenAI API key from environment
+Updated last_used timestamp for API key 5
+Embedding API Response Status: 200
+Has token_usage field: false
+📊 EMBEDDING TOKEN COUNT: 160 (source: usage.total_tokens)
+🔍 Using API key type for token tracking: user
+Using provider slug from provider object: openai
+🔍 DEBUG provider info for embedding: {"providerId":1,"providerFromParam":"openai","keyProviderId":1,"resolvedName":"openai"}
+
+📊 TRACKING LLM TOKEN USAGE
+  User ID: 4
+  Tokens: 160
+  Provider: openai
+  Model: text-embedding-3-small
+  Key Type: user
+  Source: embedding
+
+🔍 DEBUG: Tracking token usage: 160 tokens for model text-embedding-3-small
+🔍 DEBUG: Token usage details:
+- Provider: openai
+- Model: text-embedding-3-small
+- Key Type: user
+- User ID: 4 (type: number)
+    
+🔍 DEBUG: Database connection test: [{"test":1}]
+🔍 DEBUG: daily_usage_metrics table exists: [{"table_exists":true}]
+🔍 DEBUG: Using direct SQL insertion with userId: 4
+🔍 DEBUG: Using source "embedding" for token tracking
+🔍 DEBUG: Existing metric check: [{"id":17,"metric_value":24547}]
+🔍 DEBUG: Provider before JSON: openai (type: string)
+🔍 DEBUG: Metadata being stored: {"tokenType":"total","provider":"openai","model":"text-embedding-3-small","keyType":"user"}
+🔍 DEBUG: Updating existing metric ID 17 with current value 24547
+🔍 DEBUG: Update result: [{"id":17,"user_id":4,"team_id":null,"date":"2025-05-19","metric_type":"llm_tokens_used","metric_value":24707,"region":null,"storage_type":null,"source":"embedding","metadata":{"model":"text-embedding-3-small","keyType":"user","provider":"openai","tokenType":"total"},"created_at":"2025-05-19 09:18:11.682464","updated_at":"2025-05-19 17:19:06.524146"}]
+✅ SUCCESS: Tracked LLM usage metric:
+ID: 17
+Date: 2025-05-19T00:00:00.000Z
+Tokens: 160
+Provider: openai
+Model: text-embedding-3-small
+Key Type: user
+        
+✅ Successfully tracked 160 embedding tokens for user 4
+Created embedding 80c3f781-b441-409c-bcca-1fa18ce11f14 for chunk 3/3
+Attempting to store 3 embeddings in Pinecone namespace user-4-kb-26
+Starting to store 3 vectors in namespace 'user-4-kb-26' using Pinecone API at https://knowledge-assistant-k7kie05.svc.aped-4627-b74a.pinecone.io
+Pinecone API is accessible. Status: 200
+Upserting batch 1/1 with 3 vectors to https://knowledge-assistant-k7kie05.svc.aped-4627-b74a.pinecone.io
+Sample vector metadata: {"id":"a5e19aef-942c-4410-aa9c-034db0475d5f","metadata":{"user_id":"4","knowledge_base_id":"26","document_id":"151","chunk_id":"151-chunk-0","content":"[♪♪♪] ♪ We're no strangers to love ♪ ♪ You know the rules\nand so do I ♪ ♪ A full commitment's\nwhat I'm thinking of ♪ ♪ You wouldn't get this\nfrom any other guy ♪ ♪ I just wanna tell you\nhow I'm feeling ♪ ♪ Gotta make you understand ♪ ♪ Never gonna give you up ♪ ♪ Never gonna let you down ♪ ♪ Never gonna run around\nand desert you ♪ ♪ Never gonna make you cry ♪ ♪ Never gonna say goodbye ♪ ♪ Never gonna tell a lie\nand hurt you ♪ ♪ We've known each other\nfor so long ♪ ♪ Your heart's been aching\nbut you're too shy to say it ♪ ♪ Inside we both know\nwhat's been going ♪ ♪ We know the game\nand we're gonna play it ♪ ♪ And if you ask me\nhow I'm feeling ♪ ♪ Don't tell me\nyou're too blind to see ♪ ♪ Never gonna give you up ♪ ♪ Never gonna let you down ♪ ♪ Never gonna run around\nand desert you ♪ ♪ Never gonna make you cry ♪ ♪ Never gonna say goodbye ♪ ♪ Never gonna tell a lie\nand hurt you ♪ ♪ Never gonna give you up ♪ ♪ Never gonna let you down ♪ ♪ Never gonna run around\nand desert ","chunk_index":0,"total_chunks":3,"source":"youtube:Test 31","source_type":"text","created_at_iso":"2025-05-19T17:19:04.820Z"}}
+Successfully upserted batch of 3 vectors in namespace 'user-4-kb-26'
+SUCCESS: Stored 3 embeddings in Pinecone namespace user-4-kb-26
+Waiting for Pinecone to index the new embeddings (1.5 seconds)...
+5:19:06 PM [express] GET /api/knowledge-bases/26/documents/150 200 in 3ms
+Indexing delay completed.
+Pinecone index stats after embedding storage: {"namespaces":{"user-3-kb-5":{"vectorCount":74},"user-16-kb-24":{"vectorCount":169},"user-11-kb-21":{"vectorCount":311},"user-11-kb-16":{"vectorCount":3},"user-4-kb-14":{"vectorCount":121},"user-4-kb-18":{"vectorCount":114},"user-3-kb-1":{"vectorCount":4},"user-4-kb-11":{"vectorCount":6},"user-5-kb-6":{"vectorCount":40},"user-6-kb-8":{"vectorCount":74},"user-4-kb-12":{"vectorCount":7},"user-3-kb-2":{"vectorCount":34},"user-4-kb-15":{"vectorCount":260},"user-4-kb-13":{"vectorCount":57},"user-3-kb-3":{"vectorCount":7},"user-4-kb-26":{"vectorCount":124},"user-4-kb-20":{"vectorCount":12},"user-4-kb-19":{"vectorCount":4},"user-6-kb-17":{"vectorCount":230}},"indexFullness":0,"totalVectorCount":1651,"dimension":1536}
+Finalizing YouTube document 151 WITHOUT touching content field to preserve transcript
+Updating document 151 with data: {
+  status: 'processed',
+  metadata: {
+    youtube: {
+      title: 'Rick Astley - Never Gonna Give You Up (Official Music Video)',
+      views: 1656378839,
+      author: 'Rick Astley',
+      video_id: 'dQw4w9WgXcQ',
+      source_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      publish_date: '20091025',
+      thumbnail_url: 'https://i.ytimg.com/vi_webp/dQw4w9WgXcQ/maxresdefault.webp',
+      length_seconds: 212
+    },
+    custom_fields: {},
+    chunk_count: 3,
+    embedding_count: 3,
+    embedding_provider: 1,
+    isYoutubeDocument: true,
+    youtubeContentPreserved: true
+  },
+  processingInfo: {
+    step: 'completed',
+    text_length: 2089,
+    embeddings: 3,
+    finished_at: '2025-05-19T17:19:08.495Z'
+  },
+  updatedAt: 2025-05-19T17:19:08.495Z
+}
+Successfully processed YouTube video for document ID 151: 3 embeddings created
+Preserving existing YouTube document content for document 151
+Updating document 151 with data: {
+  processingInfo: { status_message: 'Creating embeddings', progress: 60 },
+  updatedAt: 2025-05-19T17:19:08.570Z
+}
+Creating embeddings for document 151 with 0 chunks
+Using normalized values: userId=4, knowledgeBaseId=26, namespace=user-4-kb-26
+Using numeric provider ID: 1
+Normalized providerId: 1 for embeddings
+Updating document 151 with data: {
+  processingInfo: { status_message: 'Finalizing document', progress: 80 },
+  updatedAt: 2025-05-19T17:19:08.619Z
+}
+CRITICAL FIX::: Finalizing YouTube document 151 WITHOUT touching content field to preserve transcript
+Updating document 151 with data: {
+  status: 'processed',
+  processingInfo: {
+    status_message: 'Processing complete',
+    progress: 100,
+    completed_at: 2025-05-19T17:19:10.169Z,
+    chunk_size: 1000,
+    chunk_overlap: 200
+  },
+  metadata: {
+    custom_fields: {},
+    chunk_count: 0,
+    embedding_count: 0,
+    embedding_provider: 1,
+    isYoutubeDocument: true,
+    youtubeContentPreserved: true,
+    content_extracted: true,
+    extraction_date: '2025-05-19T17:19:10.169Z'
+  },
+  embeddingIds: [],
+  updatedAt: 2025-05-19T17:19:10.170Z
+}
+5:19:10 PM [express] POST /api/knowledge-bases/26/documents/151/process 200 in 14154ms :: {"document…
+Token extracted from authorization header
+Decoded payload: {"iss":"https://dev-d8wu1dtr5o6osbml.us.auth0.com/","sub":"auth0|67eecef07cf3c1e3ac1bb754","aud":["https://dev-d8wu1dtr5o6osbml.us.auth0.com/api/v2/","https://dev-d8wu1dtr5o6osbml.us.auth0.com/userinfo"],"iat":1747670033,"exp":1747677233,"scope":"openid profile email","azp":"aVT07QHAv8rCCMjloxScp4up0EkxRYgr"}
+Token verified successfully, subject: auth0|67eecef07cf3c1e3ac1bb754
+5:19:10 PM [express] GET /api/knowledge-bases/26/documents/151 200 in 2ms
+Found existing user with ID: 4

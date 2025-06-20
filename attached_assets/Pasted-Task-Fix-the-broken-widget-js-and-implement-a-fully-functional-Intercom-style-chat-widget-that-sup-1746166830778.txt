@@ -1,0 +1,105 @@
+Task:
+Fix the broken widget.js and implement a fully functional, Intercom-style chat widget that supports visual theming, OTP-based contact form, and dynamic agent linking via a public key.
+
+📋 Functional Requirements
+1. Intercom-Style Chat Widget UI
+Design the widget interface to be modern and minimal, similar to Intercom:
+
+Chat bubble in bottom-right corner
+
+Opens a floating panel with:
+
+AI assistant chat interface
+
+Optional welcome message or help topics
+
+Contact form before starting, if enabled
+
+Should work seamlessly on mobile and desktop
+
+2. Dynamic Theming from Visual Customizer
+The widget's styles (colors, fonts, etc.) must be dynamically applied based on user-selected settings from the theme customizer.
+
+These values should be:
+
+Passed into the embed code or
+
+Fetched using the widget public key at runtime
+
+Examples:
+
+Chat bubble background color
+
+Button and input styling
+
+Header/footer colors
+
+3. AI Agent Link via Widget Public Key
+When the widget loads:
+
+Use the public key in the embed code to fetch and load the correct AI agent configuration.
+
+This includes:
+
+Which agent to respond with
+
+Contact fields required
+
+Theme settings (if stored per agent)
+
+Example:
+https://beyondask.app/widget.js?publicKey=agent_xyz123
+
+Backend should serve config for that publicKey
+
+4. Contact Form + OTP Verification
+Before accessing the chat, prompt for:
+
+Name
+
+Email
+
+Phone number (optional)
+
+If email OTP verification is enabled:
+
+Send OTP to entered email
+
+Validate OTP before allowing chat access
+
+After verification:
+
+Store contact info securely and link to agent conversation
+
+Proceed to AI chat interface
+
+🔧 Technical Notes
+Widget script must be placed in /public/widget.js and served correctly.
+
+Use a minimal framework (Vanilla JS or lightweight React) to keep the embed portable.
+
+Embed code should look like:
+
+html
+Copy
+Edit
+<script
+  src="https://your-repl-url/widget.js"
+  data-public-key="agent_xyz123"
+  defer
+></script>
+🔒 Security & Storage
+Protect OTP logic with rate limiting.
+
+Ensure public key cannot access unauthorized data.
+
+Store contact info securely (including IP, verification status).
+
+✅ Deliverables
+Working widget UI like Intercom
+
+Public-key-based dynamic configuration
+
+OTP contact form flow (create + validate)
+
+Compatible embed script (for websites)

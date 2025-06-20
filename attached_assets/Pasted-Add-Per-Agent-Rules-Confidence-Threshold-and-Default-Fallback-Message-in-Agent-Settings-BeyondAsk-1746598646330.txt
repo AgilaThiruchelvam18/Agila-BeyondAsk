@@ -1,0 +1,90 @@
+Add Per-Agent Rules, Confidence Threshold, and Default Fallback Message in Agent Settings (BeyondAsk)
+Task:
+Enhance the AI Agent settings page to allow configuration of custom behavioral rules, confidence threshold, and a default fallback message for each individual agent.
+
+📋 Feature 1: Custom Rules Per Agent
+✅ UI & UX
+Add a "Rules for this Agent" section to the AI Agent settings page.
+
+Allow admins to:
+
+Add multiple free-text rules
+
+Edit or delete rules
+
+Display rules in a list or card format
+
+✅ Functionality
+Store rules in the agent’s config.
+
+json
+Copy
+Edit
+{
+  "rules": [
+    "Only respond based on uploaded knowledgebase content.",
+    "Avoid hallucinations or fictional data."
+  ]
+}
+Inject rules into the AI prompt system for that agent.
+
+These should appear at the top of the AI system context (system prompt).
+
+Each agent uses only its own rules during inference.
+
+📋 Feature 2: Confidence Threshold Score Per Agent
+✅ UI & UX
+Add a "Confidence Threshold" slider or numeric input in the agent settings.
+
+Range: 0.0 to 1.0 (e.g., 0.75)
+
+Tooltip or helper text:
+"If the AI’s confidence falls below this threshold, fallback behavior will be triggered (e.g., ask for clarification or show fallback message).”
+
+✅ Functionality
+Save this value in the agent config:
+
+json
+Copy
+Edit
+{
+  "confidenceThreshold": 0.75
+}
+During inference:
+
+If the AI response or intent classification returns a confidence score below this value:
+
+Show the default fallback message like:
+“I’m not confident enough to answer that accurately. Could you rephrase or try again?”
+
+📋 Feature 3: Default Fallback Message Configuration
+✅ UI & UX
+Add a "Default Fallback Message" input field (or textarea) in the agent settings page.
+
+This will allow admins to configure a message to be shown when the AI is unsure or unable to provide a meaningful response.
+
+Example of fallback messages:
+
+“I’m not confident enough to answer that. Could you rephrase?”
+
+“Sorry, I’m unable to help with that right now. Please try again later.”
+
+✅ Functionality
+Save this fallback message in the agent configuration:
+
+json
+Copy
+Edit
+{
+  "fallbackMessage": "Sorry, I’m unable to help with that right now. Please try again later."
+}
+If confidence threshold is not met or if the AI is unable to generate a proper response, this fallback message will be shown to the user instead.
+
+🔐 Security & Validation
+Limit max rules per agent (e.g., 10)
+
+Limit rule length (e.g., 200 characters each)
+
+Ensure confidence threshold is a valid number between 0.0 and 1.0
+
+Validate the fallback message length (e.g., 500 characters max)

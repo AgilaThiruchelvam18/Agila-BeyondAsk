@@ -1,0 +1,190 @@
+Troubleshooting Guide: YouTube Document Processing Issue
+Issue Description
+There is a dual-processing issue where successful YouTube video processing is being overwritten by a second process that resets document metadata, resulting in:
+
+content: null
+chunk_count: 0
+embedding_count: 0
+Embeddings existing in Pinecone but not being reflected in document metadata
+
+Diagnostic Steps
+1. Verify the Dual-Processing Issue
+Look for logs showing a sequence like this:
+Document processing completed successfully { chunksCount: X, embeddingsCount: Y }
+// Shortly after
+Creating embeddings for document Z with 0 chunks
+Updating document Z with data: { metadata: { chunk_count: 0, embedding_count: 0 } }
+2. Identify the API Endpoint
+Check the express logs for POST requests to:
+POST /api/knowledge-bases/:kbId/documents/:docId/process
+This endpoint likely combines YouTube processing with a generic document processing flow.
+3. Locate the Route Handler
+Navigate to the API routes directory and find the file that handles:
+app.post('/api/knowledge-bases/:kbId/documents/:docId/process', ...)
+Fix Implementation
+Option 1: Modify the API Route Handler
+Locate the route handler for the document processing endpoint and add this code near the beginning:
+javascript// Add at the beginning of the route handler
+router.post('/knowledge-bases/:kbId/documents/:docId/process', async (req, res) => {
+  try {
+    const docId = req.params.docId;
+    const kbId = req.params.kbId;
+    
+    // Get current document state
+    const existingDoc = await storage.getDocument(docId);
+    
+    // Check if already processed successfully with embeddings
+    if (existingDoc.status === 'processed' && 
+        existingDoc.metadata?.embedding_count > 0 && 
+        existingDoc.processingInfo?.embeddings > 0) {
+      
+      console.log(`Document ${docId} already successfully processed with ${existingDoc.metadata.embedding_count} embeddings. Skipping duplicate processing.`);
+      
+      return res.json({
+        status: 'success',
+        message: 'Document already processed',
+        document: existingDoc
+      });
+    }
+    
+    // Check if document is YouTube video
+    const isYouTubeDoc = req.body.source === 'youtube' || 
+                         existingDoc.source === 'youtube' ||
+                         existingDoc.metadata?.youtube;
+    
+    // Clear redundant processing flag if detected
+    if (global._processingDocuments && global._processingDocuments[docId]) {
+      delete global._processingDocuments[docId];
+    }
+    
+    // Existing endpoint code continues...
+Option 2: Prevent Second Processing After YouTube
+If the route handler calls a generic document processor after the YouTube processor, modify the code:
+javascript// Find this pattern in the code
+await processYouTubeVideo(document, youtubeUrl, userId, knowledgeBaseId);
+
+// Add this check after YouTube processing
+const updatedDoc = await storage.getDocument(document.id);
+if (updatedDoc.status === 'processed' && 
+    updatedDoc.metadata?.embedding_count > 0 && 
+    updatedDoc.processingInfo?.embeddings > 0) {
+  
+  console.log(`YouTube processing completed successfully for document ${document.id}. Skipping additional processing.`);
+  
+  // Skip the next processing call
+  return res.json({
+    status: 'success',
+    message: 'YouTube document processed',
+    document: updatedDoc
+  });
+}
+
+// If the code doesn't immediately return, prevent the subsequent processDocument call
+// Look for this pattern and add a condition
+if (shouldProcessDocument) { // Add this condition
+  await processDocument(document, ...);
+}
+Option 3: Add Processing Lock
+Add a simple global processing lock to prevent concurrent processing:
+javascript// Near the top of your file or in a shared utility
+if (!global._processingDocuments) {
+  global._processingDocuments = {};
+}
+
+// In your route handler
+router.post('/knowledge-bases/:kbId/documents/:docId/process', async (req, res) => {
+  const docId = req.params.docId;
+  
+  // Check if already processing
+  if (global._processingDocuments[docId]) {
+    console.log(`Document ${docId} is already being processed. Preventing duplicate processing.`);
+    return res.status(409).json({
+      status: 'error',
+      message: 'Document is already being processed',
+      code: 'CONCURRENT_PROCESSING'
+    });
+  }
+  
+  // Set processing lock
+  global._processingDocuments[docId] = true;
+  
+  try {
+    // Your existing code...
+    
+    // Process complete
+    return res.json({ ... });
+  } catch (error) {
+    // Handle error...
+    return res.status(500).json({ ... });
+  } finally {
+    // Always remove the lock
+    delete global._processingDocuments[docId];
+  }
+});
+Testing the Fix
+
+Process a YouTube video document
+Check the logs to verify only one processing flow is executed
+Verify the final document metadata has:
+
+Correct chunk_count (matching the number of chunks created)
+Correct embedding_count (matching the number of embeddings stored in Pinecone)
+content_extracted: true (or the content field not being null)
+
+
+
+Additional Diagnostic Information
+Look for these patterns in the codebase:
+
+A function or method that processes documents generically, likely called after processYouTubeVideo
+A subscription check that might trigger reprocessing
+Calls to update document metadata after processing is complete
+
+The issue is most likely in the route handler that orchestrates different processing methods based on document type, rather than in the processYouTubeVideo function itself.
+Handling Existing Bad Data
+If you have documents with incorrect metadata (embeddings in Pinecone but metadata shows count as 0):
+javascript// Repair script
+async function repairDocumentMetadata(docId) {
+  const doc = await storage.getDocument(docId);
+  
+  if (doc.status === 'processed' && 
+      doc.metadata?.chunk_count === 0 && 
+      doc.metadata?.embedding_count === 0) {
+    
+    // Check Pinecone for actual embeddings
+    const namespace = `user-${doc.userId}-kb-${doc.knowledgeBaseId}`;
+    const filter = { document_id: docId.toString() };
+    
+    const pineconeService = new PineconeService();
+    const vectors = await pineconeService.query({
+      namespace,
+      filter,
+      topK: 100, // Get all chunks for this document
+      includeMetadata: true
+    });
+    
+    if (vectors.matches && vectors.matches.length > 0) {
+      console.log(`Found ${vectors.matches.length} vectors in Pinecone for document ${docId}`);
+      
+      // Update document metadata with correct counts
+      await storage.updateDocument(docId, {
+        metadata: {
+          ...doc.metadata,
+          chunk_count: vectors.matches.length,
+          embedding_count: vectors.matches.length,
+          content_extracted: true
+        },
+        processingInfo: {
+          ...doc.processingInfo,
+          embeddings: vectors.matches.length,
+          error: null // Clear any error
+        }
+      });
+      
+      console.log(`Repaired metadata for document ${docId}`);
+      return true;
+    }
+  }
+  
+  return false;
+}

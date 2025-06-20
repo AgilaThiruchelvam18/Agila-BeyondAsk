@@ -1,0 +1,627 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Database, MessageSquare, Plus, Trash2, CornerRightDown } from 'lucide-react';
+
+const App = () => {
+  const [nodes, setNodes] = useState([
+    { id: 'chat-1', type: 'chat', position: { x: 350, y: 100 }, size: { width: 320, height: 280 }, content: '', messages: [] },
+    { id: 'kb-1', type: 'knowledgebase', position: { x: 50, y: 50 }, size: { width: 200, height: 120 }, title: 'General Knowledge', content: 'This is a general knowledge base.' },
+    { id: 'kb-2', type: 'knowledgebase', position: { x: 50, y: 200 }, size: { width: 200, height: 120 }, title: 'Technical Docs', content: 'This knowledge base contains technical docs.' }
+  ]);
+  
+  const [edges, setEdges] = useState([]);
+  const [draggedNode, setDraggedNode] = useState(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [draggingEdge, setDraggingEdge] = useState(null);
+  const [hoveredNode, setHoveredNode] = useState(null);
+  const [currentChatId, setCurrentChatId] = useState('chat-1');
+  const [userInput, setUserInput] = useState('');
+  const [nextNodeId, setNextNodeId] = useState(3);
+  const [resizingNode, setResizingNode] = useState(null);
+  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0 });
+  
+  const canvasRef = useRef(null);
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [nodes.find(node => node.id === currentChatId)?.messages]);
+
+  const handleMouseDown = (e, nodeId) => {
+    const node = nodes.find(n => n.id === nodeId);
+    if (!node) return;
+    
+    e.preventDefault(); // Prevent text selection
+    
+    // Add global text selection prevention
+    document.body.style.userSelect = 'none';
+    document.body.style.webkitUserSelect = 'none';
+    document.body.style.mozUserSelect = 'none';
+    document.body.style.msUserSelect = 'none';
+    
+    setDraggedNode(nodeId);
+    setDragOffset({
+      x: e.clientX - node.position.x,
+      y: e.clientY - node.position.y
+    });
+  };
+
+  const handleMouseMove = (e) => {
+    if (draggedNode) {
+      const updatedNodes = nodes.map(node => {
+        if (node.id === draggedNode) {
+          return {
+            ...node,
+            position: {
+              x: e.clientX - dragOffset.x,
+              y: e.clientY - dragOffset.y
+            }
+          };
+        }
+        return node;
+      });
+      setNodes(updatedNodes);
+    }
+    
+    if (resizingNode) {
+      const node = nodes.find(n => n.id === resizingNode);
+      if (!node) return;
+      
+      // Calculate new width and height
+      const newWidth = Math.max(200, node.size.width + (e.clientX - resizeStart.x));
+      const newHeight = Math.max(100, node.size.height + (e.clientY - resizeStart.y));
+      
+      const updatedNodes = nodes.map(n => {
+        if (n.id === resizingNode) {
+          return {
+            ...n,
+            size: {
+              width: newWidth,
+              height: newHeight
+            }
+          };
+        }
+        return n;
+      });
+      
+      setNodes(updatedNodes);
+      setResizeStart({ x: e.clientX, y: e.clientY });
+    }
+    
+    // Store the event for use in renderDraggingEdge
+    window.event = e;
+  };
+
+  const handleMouseUp = () => {
+    // Restore text selection
+    document.body.style.userSelect = '';
+    document.body.style.webkitUserSelect = '';
+    document.body.style.mozUserSelect = '';
+    document.body.style.msUserSelect = '';
+    
+    if (draggingEdge && hoveredNode) {
+      const { source, sourceHandle } = draggingEdge;
+      const target = hoveredNode;
+      
+      // Check if connection is valid (can be from knowledgebase -> chat OR from chat -> knowledgebase)
+      const sourceNode = nodes.find(n => n.id === source);
+      const targetNode = nodes.find(n => n.id === target);
+      
+      // Check for valid connections based on node types
+      if (
+        sourceNode && targetNode && 
+        (
+          // Allow KB -> Chat connections
+          (sourceNode.type === 'knowledgebase' && targetNode.type === 'chat') ||
+          // Allow Chat -> KB connections
+          (sourceNode.type === 'chat' && targetNode.type === 'knowledgebase')
+        ) &&
+        // Prevent duplicate connections
+        !edges.some(edge => edge.source === source && edge.target === target)
+      ) {
+        setEdges([...edges, { id: `${source}-${target}`, source, target }]);
+      }
+    }
+    
+    setDraggedNode(null);
+    setDraggingEdge(null);
+    setHoveredNode(null);
+    setResizingNode(null);
+  };
+
+  const handleResizeStart = (e, nodeId) => {
+    e.stopPropagation();
+    e.preventDefault(); // Prevent text selection
+    
+    // Add global text selection prevention
+    document.body.style.userSelect = 'none';
+    document.body.style.webkitUserSelect = 'none';
+    document.body.style.mozUserSelect = 'none';
+    document.body.style.msUserSelect = 'none';
+    
+    setResizingNode(nodeId);
+    setResizeStart({ x: e.clientX, y: e.clientY });
+  };
+
+  const handlePortMouseDown = (e, nodeId, handle) => {
+    e.stopPropagation();
+    e.preventDefault(); // Prevent default browser behaviors like text selection
+    
+    // Add global text selection prevention
+    document.body.style.userSelect = 'none';
+    document.body.style.webkitUserSelect = 'none';
+    document.body.style.mozUserSelect = 'none';
+    document.body.style.msUserSelect = 'none';
+    
+    setDraggingEdge({
+      source: nodeId,
+      sourceHandle: handle
+    });
+  };
+
+  const handleNodeMouseEnter = (nodeId) => {
+    setHoveredNode(nodeId);
+  };
+
+  const handleNodeMouseLeave = () => {
+    setHoveredNode(null);
+  };
+
+  const handleSendMessage = () => {
+    if (!userInput.trim()) return;
+    
+    const connectedKBs = edges
+      .filter(edge => edge.target === currentChatId)
+      .map(edge => nodes.find(n => n.id === edge.source))
+      .filter(Boolean);
+    
+    const updatedNodes = nodes.map(node => {
+      if (node.id === currentChatId) {
+        const newMessages = [
+          ...node.messages,
+          { sender: 'user', text: userInput }
+        ];
+        
+        if (connectedKBs.length > 0) {
+          const response = "I've consulted the knowledge bases. This is a simulated response based on connected knowledge.";
+          newMessages.push({ sender: 'bot', text: response });
+        } else {
+          newMessages.push({ 
+            sender: 'bot', 
+            text: "I don't have any knowledge bases connected. Please connect at least one knowledge base to respond to your query."
+          });
+        }
+        
+        return {
+          ...node,
+          messages: newMessages
+        };
+      }
+      return node;
+    });
+    
+    setNodes(updatedNodes);
+    setUserInput('');
+  };
+
+  const addNewNode = (type) => {
+    const id = type === 'chat' ? `chat-${nextNodeId}` : `kb-${nextNodeId}`;
+    const newNode = {
+      id,
+      type,
+      position: { x: 300, y: 100 },
+      size: type === 'chat' ? { width: 320, height: 280 } : { width: 200, height: 120 },
+      title: type === 'knowledgebase' ? `Knowledge Base ${nextNodeId}` : `Chat ${nextNodeId}`,
+      content: type === 'knowledgebase' ? 'New knowledge base content.' : '',
+      messages: []
+    };
+    
+    setNodes([...nodes, newNode]);
+    setNextNodeId(nextNodeId + 1);
+    
+    if (type === 'chat') {
+      setCurrentChatId(id);
+    }
+  };
+
+  const deleteNode = (id) => {
+    // Remove the node
+    const filteredNodes = nodes.filter(node => node.id !== id);
+    
+    // Remove all connected edges
+    const filteredEdges = edges.filter(edge => edge.source !== id && edge.target !== id);
+    
+    setNodes(filteredNodes);
+    setEdges(filteredEdges);
+    
+    // If we deleted the current chat, switch to another chat
+    if (id === currentChatId) {
+      const remainingChat = filteredNodes.find(node => node.type === 'chat');
+      if (remainingChat) {
+        setCurrentChatId(remainingChat.id);
+      } else {
+        setCurrentChatId(null);
+      }
+    }
+  };
+
+  const deleteEdge = (edgeId) => {
+    setEdges(edges.filter(edge => edge.id !== edgeId));
+  };
+  
+  const getConnectedNodes = (nodeId) => {
+    return edges
+      .filter(edge => edge.source === nodeId || edge.target === nodeId)
+      .map(edge => {
+        const connectedNodeId = edge.source === nodeId ? edge.target : edge.source;
+        const connectedNode = nodes.find(n => n.id === connectedNodeId);
+        return {
+          edge: edge,
+          node: connectedNode
+        };
+      })
+      .filter(item => item.node !== undefined);
+  };
+
+  const renderEdges = () => {
+    return edges.map(edge => {
+      const source = nodes.find(n => n.id === edge.source);
+      const target = nodes.find(n => n.id === edge.target);
+      
+      if (!source || !target) return null;
+      
+      // Determine connection points based on node types
+      let sourcePos, targetPos;
+      
+      if (source.type === 'knowledgebase' && target.type === 'chat') {
+        // KB -> Chat connection
+        sourcePos = {
+          x: source.position.x + source.size.width,
+          y: source.position.y + source.size.height / 2
+        };
+        
+        targetPos = {
+          x: target.position.x,
+          y: target.position.y + target.size.height / 2
+        };
+      } else if (source.type === 'chat' && target.type === 'knowledgebase') {
+        // Chat -> KB connection
+        sourcePos = {
+          x: source.position.x,
+          y: source.position.y + source.size.height / 2
+        };
+        
+        targetPos = {
+          x: target.position.x + target.size.width,
+          y: target.position.y + target.size.height / 2
+        };
+      } else {
+        // Fallback (should not happen with proper validation)
+        sourcePos = {
+          x: source.position.x + source.size.width / 2,
+          y: source.position.y + source.size.height / 2
+        };
+        
+        targetPos = {
+          x: target.position.x + target.size.width / 2,
+          y: target.position.y + target.size.height / 2
+        };
+      }
+      
+      // Calculate distance for curve control
+      const dx = targetPos.x - sourcePos.x;
+      const dy = targetPos.y - sourcePos.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      // Control points for the cubic Bezier curve
+      const cp1x = sourcePos.x + distance * 0.25;
+      const cp1y = sourcePos.y;
+      const cp2x = targetPos.x - distance * 0.25;
+      const cp2y = targetPos.y;
+      
+      // Create path for the curve using cubic Bezier
+      const path = `M ${sourcePos.x} ${sourcePos.y} 
+                     C ${cp1x} ${cp1y},
+                       ${cp2x} ${cp2y},
+                       ${targetPos.x} ${targetPos.y}`;
+      
+      // Calculate the actual midpoint on the cubic Bezier curve at t=0.5
+      // For a cubic Bezier, the point at parameter t is:
+      // B(t) = (1-t)³P₀ + 3(1-t)²tP₁ + 3(1-t)t²P₂ + t³P₃
+      // At t=0.5, this simplifies considerably
+      const t = 0.5;
+      const mt = 1 - t;
+      const midPoint = {
+        x: mt*mt*mt*sourcePos.x + 3*mt*mt*t*cp1x + 3*mt*t*t*cp2x + t*t*t*targetPos.x,
+        y: mt*mt*mt*sourcePos.y + 3*mt*mt*t*cp1y + 3*mt*t*t*cp2y + t*t*t*targetPos.y
+      };
+      
+      const handleDeleteEdge = (e) => {
+        e.stopPropagation();
+        deleteEdge(edge.id);
+      };
+      
+      return (
+        <g key={edge.id}>
+          <path
+            d={path}
+            fill="none"
+            stroke="#6366f1"
+            strokeWidth="2"
+            pointerEvents="none"
+          />
+          <circle
+            cx={midPoint.x}
+            cy={midPoint.y}
+            r="12"
+            fill="#6366f1"
+            onClick={handleDeleteEdge}
+            className="cursor-pointer hover:fill-red-500"
+            style={{ pointerEvents: 'all' }}
+          />
+          <X
+            size={16}
+            color="white"
+            className="cursor-pointer"
+            style={{
+              position: 'absolute',
+              left: midPoint.x - 8,
+              top: midPoint.y - 8,
+              pointerEvents: 'none'
+            }}
+          />
+        </g>
+      );
+    });
+  };
+
+  const renderDraggingEdge = () => {
+    if (!draggingEdge) return null;
+    
+    const sourceNode = nodes.find(n => n.id === draggingEdge.source);
+    if (!sourceNode) return null;
+    
+    // Determine the source position based on node type
+    let sourcePos;
+    if (sourceNode.type === 'knowledgebase') {
+      sourcePos = {
+        x: sourceNode.position.x + sourceNode.size.width,
+        y: sourceNode.position.y + sourceNode.size.height / 2
+      };
+    } else {
+      // Chat node - connector is on the left
+      sourcePos = {
+        x: sourceNode.position.x,
+        y: sourceNode.position.y + sourceNode.size.height / 2
+      };
+    }
+    
+    // Get current mouse position
+    const canvasRect = canvasRef.current.getBoundingClientRect();
+    const mouseX = window.event ? window.event.clientX - canvasRect.left : 0;
+    const mouseY = window.event ? window.event.clientY - canvasRect.top : 0;
+    
+    // Calculate distance for curve control
+    const dx = mouseX - sourcePos.x;
+    const dy = mouseY - sourcePos.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    // Create path for the curve using cubic Bezier
+    const path = `M ${sourcePos.x} ${sourcePos.y} 
+                   C ${sourcePos.x + distance * 0.25} ${sourcePos.y},
+                     ${mouseX - distance * 0.25} ${mouseY},
+                     ${mouseX} ${mouseY}`;
+    
+    return (
+      <path
+        d={path}
+        fill="none"
+        stroke="#6366f1"
+        strokeWidth="2"
+        strokeDasharray="5,5"
+      />
+    );
+  };
+
+  const renderConnections = (nodeId) => {
+    const connectedItems = getConnectedNodes(nodeId);
+    
+    if (connectedItems.length === 0) {
+      return <div className="text-xs text-gray-400">No connections</div>;
+    }
+    
+    return (
+      <div className="mt-1 p-1 bg-gray-100 rounded-sm max-h-20 overflow-y-auto">
+        <div className="text-xs font-semibold mb-1">Connections:</div>
+        {connectedItems.map(({edge, node}) => (
+          <div key={edge.id} className="text-xs flex items-center justify-between">
+            <span className="truncate">{node.title || node.id}</span>
+            <button 
+              className="text-red-500 hover:text-red-700"
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteEdge(edge.id);
+              }}
+            >
+              <X size={12} />
+            </button>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderNodes = () => {
+    return nodes.map(node => {
+      const isHovered = hoveredNode === node.id;
+      const isChat = node.type === 'chat';
+      const isActive = isChat && node.id === currentChatId;
+      
+      return (
+        <div
+          key={node.id}
+          className={`absolute rounded-lg shadow-lg transition-shadow ${
+            isHovered ? 'shadow-xl' : ''
+          } bg-white`}
+          style={{
+            left: node.position.x,
+            top: node.position.y,
+            width: node.size.width,
+            height: node.size.height,
+            zIndex: draggedNode === node.id ? 10 : 1
+          }}
+          onMouseDown={(e) => handleMouseDown(e, node.id)}
+          onMouseEnter={() => handleNodeMouseEnter(node.id)}
+          onMouseLeave={handleNodeMouseLeave}
+        >
+          <div className={`
+            p-2 rounded-t-lg flex justify-between items-center
+            ${isChat ? 'bg-blue-600 text-white' : 'bg-indigo-600 text-white'}
+          `}>
+            <div className="flex items-center gap-2">
+              {isChat ? (
+                <MessageSquare size={16} />
+              ) : (
+                <Database size={16} />
+              )}
+              {isChat ? 'Chat' : node.title}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                className="text-white hover:text-red-300"
+                onClick={() => deleteNode(node.id)}
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+
+          <div className="p-3 h-[calc(100%-40px)] flex flex-col">
+            {isChat ? (
+              <>
+                <div className="flex-1 overflow-y-auto mb-2 p-2 bg-gray-50 rounded text-sm">
+                  {node.messages.length === 0 ? (
+                    <div className="text-gray-400 text-center mt-5">
+                      Connect knowledge bases and start chatting!
+                    </div>
+                  ) : (
+                    node.messages.map((msg, i) => (
+                      <div 
+                        key={i} 
+                        className={`mb-2 p-2 rounded max-w-[80%] ${
+                          msg.sender === 'user' 
+                            ? 'bg-blue-100 ml-auto' 
+                            : 'bg-gray-200'
+                        }`}
+                      >
+                        {msg.text}
+                      </div>
+                    ))
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+                {/* Show connections for chat */}
+                {renderConnections(node.id)}
+                <div className="flex gap-2 mt-2">
+                  <input
+                    className="flex-1 border rounded p-2 text-sm"
+                    placeholder="Type message..."
+                    value={userInput}
+                    onChange={(e) => setUserInput(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <button
+                    className="bg-blue-600 text-white rounded px-3 py-1 text-sm hover:bg-blue-500"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSendMessage();
+                    }}
+                  >
+                    Send
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="w-full h-full p-2 text-sm border rounded resize-none bg-white overflow-y-auto">
+                  {node.content}
+                </div>
+                {/* Show connections for knowledge base */}
+                {renderConnections(node.id)}
+                <div
+                  className="absolute w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center cursor-pointer right-0 top-1/2 transform translate-x-3"
+                  onMouseDown={(e) => handlePortMouseDown(e, node.id, 'output')}
+                >
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                </div>
+              </>
+            )}
+          </div>
+          
+          {/* Chat node connector (on the left side) */}
+          {isChat && (
+            <div
+              className="absolute w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center cursor-pointer left-0 top-1/2 transform -translate-x-3"
+              onMouseDown={(e) => handlePortMouseDown(e, node.id, 'input')}
+            >
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+            </div>
+          )}
+          
+          {/* Resize handle */}
+          <div
+            className="absolute bottom-0 right-0 w-6 h-6 cursor-se-resize flex items-center justify-center"
+            onMouseDown={(e) => handleResizeStart(e, node.id)}
+          >
+            <CornerRightDown size={14} className="text-gray-400" />
+          </div>
+        </div>
+      );
+    });
+  };
+
+  return (
+    <div className="h-full bg-gray-100 overflow-hidden flex flex-col rounded-lg border border-gray-200 select-none" style={{ height: '450px' }}>
+      <div className="bg-indigo-700 text-white p-2 flex justify-between items-center">
+        <h1 className="text-lg font-bold">Visual Knowledge Base Builder</h1>
+        <div className="flex gap-2">
+          <button
+            className="bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1 rounded text-xs flex items-center gap-1"
+            onClick={() => addNewNode('knowledgebase')}
+          >
+            <Plus size={12} /> Add KB
+          </button>
+          <button
+            className="bg-blue-600 hover:bg-blue-500 text-white px-2 py-1 rounded text-xs flex items-center gap-1"
+            onClick={() => addNewNode('chat')}
+          >
+            <Plus size={12} /> Add Chat
+          </button>
+        </div>
+      </div>
+      
+      <div className="flex-1 relative overflow-hidden">
+        <div 
+          className="h-full w-full"
+          ref={canvasRef}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+        >
+          <svg className="absolute w-full h-full">
+            {renderEdges()}
+            {renderDraggingEdge()}
+          </svg>
+          {renderNodes()}
+        </div>
+      </div>
+      <div className="bg-gray-200 p-1 text-xs text-center text-gray-600">
+        Try: 1) Drag nodes 2) Resize nodes 3) Connect KB to Chat 4) Delete connections
+      </div>
+    </div>
+  );
+};
+
+export default App;

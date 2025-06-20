@@ -1,0 +1,57 @@
+dist/public/assets/index-B_knwlZ4.js         839.10 kB │ gzip: 240.51 kB
+✓ built in 10.55s
+✅ Frontend build completed successfully
+🔧 Building server with esbuild...
+▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+
+    server/index.ts:30:25:
+      30 │ ...t _filename = typeof import.meta !== 'undefined' ? fi...
+         ╵                         ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work
+  correctly.
+
+▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+
+    server/index.ts:30:69:
+      30 │ ...a !== 'undefined' ? fileURLToPath(import.meta.url) : '';
+         ╵                                      ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work
+  correctly.
+
+▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+
+    server/vite.ts:6:33:
+      6 │ const __filename = fileURLToPath(import.meta.url);
+        ╵                                  ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work
+  correctly.
+
+✘ [ERROR] Top-level await is currently not supported with the "cjs" output format
+
+    vite.config.ts:19:10:
+      19 │           await import("@replit/vite-plugin-cartographer...
+         ╵           ~~~~~
+
+▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+
+    vite.config.ts:8:33:
+      8 │ const __filename = fileURLToPath(import.meta.url);
+        ╵                                  ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work
+  correctly.
+
+▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+
+    server/routes.ts:23:33:
+      23 │ const __filename = fileURLToPath(import.meta.url);
+         ╵                                  ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work
+  correctly.
+
+5 warnings and 1 error
+❌ Server build failed: Command failed: esbuild server/index.ts --platform=node --packages=external --bundle --format=cjs --outdir=dist --sourcemap --allow-overwrite --preserve-symlinks

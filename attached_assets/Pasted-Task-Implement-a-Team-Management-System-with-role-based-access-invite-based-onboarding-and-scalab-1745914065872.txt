@@ -1,0 +1,114 @@
+Task:
+Implement a Team Management System with role-based access, invite-based onboarding, and scalable design for future enhancements.
+
+🛠 Core Requirements (Phase 1)
+1. Team Member Roles
+Introduce two roles:
+
+Admin
+
+Can add, edit, delete resources (Knowledgebase articles, AI agents, contacts, etc.).
+
+Can invite, manage, or remove team members.
+
+User
+
+Can add and edit resources.
+
+Cannot delete resources.
+
+Cannot invite or manage other users.
+
+2. Invitation System
+Admins can send an invitation to new team members via email.
+
+Each invite includes:
+
+A secure invite link that expires after 48 hours.
+
+Assigned role (Admin or User).
+
+3. Accepting Invites
+Invitees click the invite link to:
+
+Sign up (or link an existing account).
+
+Join the inviter’s organization/team with the specified role.
+
+If the link has expired or already used, show a proper error message.
+
+4. Manage Team Members
+Add a Team Management page where Admins can:
+
+View all team members (Name, Email, Role, Status).
+
+Filter by role or status (active/invited/pending).
+
+Resend invites.
+
+Remove team members (Admins only).
+
+5. Role-Based Access Control (RBAC)
+Enforce permissions on both frontend and backend:
+
+Admins see full management options.
+
+Users are restricted based on their role.
+
+6. Email Design
+Invitation emails should:
+
+Be clean and modern, matching BeyondAsk branding.
+
+Include clear call-to-action ("Accept Invitation" button).
+
+🚀 Stretch Goals (Optional / Phase 2)
+A. Flexible Role Management
+Plan system to allow adding more roles easily in the future without reworking the whole permission logic.
+
+B. Fine-grained Permissions
+Prepare structure to define permissions per module (Knowledgebase, AI agents, Contacts).
+
+C. Activity Logs (Audit Trail)
+Track and log actions like:
+
+Created/edited/deleted knowledgebase articles.
+
+Invited/removed team members.
+
+Display logs in an "Activity Log" page accessible to Admins.
+
+D. Pending Invitation Management
+Allow Admins to:
+
+Cancel pending invites.
+
+See expiration time of invites.
+
+Track when invites are accepted or expired.
+
+E. Notifications
+Email notification for:
+
+A new team member joining.
+
+Invite expiring without acceptance.
+
+Role changes.
+
+F. User Profiles
+Allow team members to:
+
+Update profile picture, name, and password.
+
+Securely update email address with re-verification.
+
+G. Future Multi-Organization Support (Advanced)
+Design user accounts so that one user can belong to multiple teams with different roles, if needed later.
+
+🔒 Security Notes
+Use secure tokens for invites (e.g., JWTs with expiry or random codes stored in DB).
+
+Protect invite links from brute-force attacks.
+
+Validate role-based permissions strictly server-side.

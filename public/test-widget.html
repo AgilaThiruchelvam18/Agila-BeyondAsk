@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BeyondAsk Widget Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      color: #0078d4;
+      margin-bottom: 20px;
+    }
+    h2 {
+      color: #0078d4;
+      margin-top: 30px;
+      margin-bottom: 15px;
+    }
+    .card {
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #eee;
+    }
+    code {
+      background-color: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 14px;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 14px;
+    }
+    .demo-section {
+      margin-top: 40px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    input {
+      width: 100%;
+      padding: 8px 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #0078d4;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #006cbe;
+    }
+    #theme-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .color-input {
+      display: flex;
+      flex-direction: column;
+      width: calc(25% - 10px);
+      min-width: 120px;
+    }
+  </style>
+</head>
+<body>
+  <h1>BeyondAsk Widget Test Page</h1>
+  
+  <div class="card">
+    <h2>Widget Integration</h2>
+    <p>This page demonstrates the integration of the BeyondAsk Chat Widget with various configurations.</p>
+    
+    <div id="public-key-section">
+      <label for="publicKey">Widget Public Key:</label>
+      <div style="display: flex; gap: 10px;">
+        <input type="text" id="publicKey" placeholder="Enter your widget public key..." value=""/>
+        <button onclick="loadWidgetWithKey()">Load Widget</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="demo-section card">
+    <h2>Widget Customization</h2>
+    
+    <div id="theme-controls">
+      <div class="color-input">
+        <label for="primaryColor">Primary Color:</label>
+        <input type="color" id="primaryColor" value="#0078d4" />
+      </div>
+      
+      <div class="color-input">
+        <label for="textColor">Text Color:</label>
+        <input type="color" id="textColor" value="#ffffff" />
+      </div>
+      
+      <div class="color-input">
+        <label for="backgroundColor">Background:</label>
+        <input type="color" id="backgroundColor" value="#ffffff" />
+      </div>
+      
+      <div class="color-input">
+        <label for="secondaryTextColor">Content Text:</label>
+        <input type="color" id="secondaryTextColor" value="#333333" />
+      </div>
+    </div>
+    
+    <div style="margin-bottom: 20px;">
+      <label for="position">Widget Position:</label>
+      <select id="position" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+        <option value="bottom-right">Bottom Right</option>
+        <option value="bottom-left">Bottom Left</option>
+        <option value="top-right">Top Right</option>
+        <option value="top-left">Top Left</option>
+      </select>
+      
+      <label for="size">Widget Size:</label>
+      <select id="size" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+        <option value="medium">Medium</option>
+        <option value="small">Small</option>
+        <option value="large">Large</option>
+      </select>
+      
+      <label for="welcomeMessage">Welcome Message:</label>
+      <textarea id="welcomeMessage" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; min-height: 80px;">Hello! How can I help you today?</textarea>
+    </div>
+    
+    <div style="margin-bottom: 20px;">
+      <label style="display: inline-flex; align-items: center;">
+        <input type="checkbox" id="collectName" checked style="width: auto; margin-right: 8px;"> 
+        Collect Name
+      </label>
+      <br>
+      <label style="display: inline-flex; align-items: center;">
+        <input type="checkbox" id="collectEmail" checked style="width: auto; margin-right: 8px;"> 
+        Collect Email
+      </label>
+      <br>
+      <label style="display: inline-flex; align-items: center;">
+        <input type="checkbox" id="collectPhone" style="width: auto; margin-right: 8px;"> 
+        Collect Phone
+      </label>
+      <br>
+      <label style="display: inline-flex; align-items: center;">
+        <input type="checkbox" id="requireOtp" checked style="width: auto; margin-right: 8px;"> 
+        Require OTP Verification
+      </label>
+    </div>
+    
+    <button onclick="applyCustomization()">Apply Customization</button>
+    <button onclick="resetCustomization()" style="background-color: #666; margin-left: 10px;">Reset</button>
+  </div>
+  
+  <div class="demo-section card">
+    <h2>Widget Control</h2>
+    <p>Use these buttons to control the widget:</p>
+    
+    <div style="display: flex; gap: 10px;">
+      <button onclick="openWidget()">Open Widget</button>
+      <button onclick="closeWidget()" style="background-color: #666;">Close Widget</button>
+      <button onclick="toggleWidget()" style="background-color: #5c2d91;">Toggle Widget</button>
+    </div>
+  </div>
+  
+  <div class="demo-section card">
+    <h2>Implementation Code</h2>
+    <p>Copy and paste this code into your website to integrate the BeyondAsk Widget:</p>
+    
+    <pre id="embedCode"><!-- Add your widget embed code here --></pre>
+    
+    <button onclick="copyEmbedCode()" style="background-color: #107c10;">Copy Code</button>
+  </div>
+  
+  <script>
+    // Store the widget script element for removal if needed
+    let widgetScript = null;
+    let publicKey = '';
+    
+    // Function to load widget with specified public key
+    function loadWidgetWithKey() {
+      // Remove existing widget if any
+      if (widgetScript && widgetScript.parentNode) {
+        widgetScript.parentNode.removeChild(widgetScript);
+      }
+      
+      const widgetContainer = document.getElementById('beyond-widget-container');
+      if (widgetContainer && widgetContainer.parentNode) {
+        widgetContainer.parentNode.removeChild(widgetContainer);
+      }
+      
+      // Get the public key from input
+      publicKey = document.getElementById('publicKey').value.trim();
+      
+      if (!publicKey) {
+        alert('Please enter a valid public key');
+        return;
+      }
+      
+      // Create and add widget script
+      widgetScript = document.createElement('script');
+      widgetScript.src = '/widget.js';
+      widgetScript.setAttribute('data-public-key', publicKey);
+      widgetScript.async = true;
+      document.body.appendChild(widgetScript);
+      
+      // Update embed code display
+      updateEmbedCode();
+    }
+    
+    // Function to apply customization
+    function applyCustomization() {
+      // Get customization values
+      const primaryColor = document.getElementById('primaryColor').value;
+      const textColor = document.getElementById('textColor').value;
+      const backgroundColor = document.getElementById('backgroundColor').value;
+      const secondaryTextColor = document.getElementById('secondaryTextColor').value;
+      const position = document.getElementById('position').value;
+      const size = document.getElementById('size').value;
+      const welcomeMessage = document.getElementById('welcomeMessage').value;
+      const collectName = document.getElementById('collectName').checked;
+      const collectEmail = document.getElementById('collectEmail').checked;
+      const collectPhone = document.getElementById('collectPhone').checked;
+      const requireOtp = document.getElementById('requireOtp').checked;
+      
+      // Apply customization if widget is loaded
+      if (window.beyondWidget) {
+        window.beyondWidget('setConfig', {
+          theme: {
+            primaryColor,
+            textColor,
+            backgroundColor,
+            secondaryTextColor
+          },
+          position,
+          size,
+          welcomeMessage,
+          collectName,
+          collectEmail,
+          collectPhone,
+          requireOtpVerification: requireOtp
+        });
+      } else {
+        alert('Please load the widget first');
+      }
+      
+      // Update embed code display
+      updateEmbedCode();
+    }
+    
+    // Function to reset customization
+    function resetCustomization() {
+      // Reset form fields to default values
+      document.getElementById('primaryColor').value = '#0078d4';
+      document.getElementById('textColor').value = '#ffffff';
+      document.getElementById('backgroundColor').value = '#ffffff';
+      document.getElementById('secondaryTextColor').value = '#333333';
+      document.getElementById('position').value = 'bottom-right';
+      document.getElementById('size').value = 'medium';
+      document.getElementById('welcomeMessage').value = 'Hello! How can I help you today?';
+      document.getElementById('collectName').checked = true;
+      document.getElementById('collectEmail').checked = true;
+      document.getElementById('collectPhone').checked = false;
+      document.getElementById('requireOtp').checked = true;
+      
+      // Apply reset customization
+      applyCustomization();
+    }
+    
+    // Function to open widget
+    function openWidget() {
+      if (window.beyondWidget) {
+        window.beyondWidget('open');
+      } else {
+        alert('Please load the widget first');
+      }
+    }
+    
+    // Function to close widget
+    function closeWidget() {
+      if (window.beyondWidget) {
+        window.beyondWidget('close');
+      } else {
+        alert('Please load the widget first');
+      }
+    }
+    
+    // Function to toggle widget
+    function toggleWidget() {
+      if (window.beyondWidget) {
+        window.beyondWidget('toggle');
+      } else {
+        alert('Please load the widget first');
+      }
+    }
+    
+    // Function to update embed code display
+    function updateEmbedCode() {
+      const primaryColor = document.getElementById('primaryColor').value;
+      const textColor = document.getElementById('textColor').value;
+      const backgroundColor = document.getElementById('backgroundColor').value;
+      const secondaryTextColor = document.getElementById('secondaryTextColor').value;
+      const position = document.getElementById('position').value;
+      const size = document.getElementById('size').value;
+      const welcomeMessage = document.getElementById('welcomeMessage').value;
+      const collectName = document.getElementById('collectName').checked;
+      const collectEmail = document.getElementById('collectEmail').checked;
+      const collectPhone = document.getElementById('collectPhone').checked;
+      const requireOtp = document.getElementById('requireOtp').checked;
+      
+      // Ensure publicKey is included in the embed code
+      const widgetPublicKey = document.getElementById('publicKey').value || '';
+      
+      const code = `<script
+  src="${window.location.origin}/widget.js"
+  data-public-key="${widgetPublicKey}"
+  defer
+><\/script>
+
+<!-- Optional: Widget Initialization with Configuration -->
+<script>
+  window.addEventListener('load', function() {
+    if (window.beyondWidget) {
+      window.beyondWidget('setConfig', {
+        theme: {
+          primaryColor: "${primaryColor}",
+          textColor: "${textColor}",
+          backgroundColor: "${backgroundColor}",
+          secondaryTextColor: "${secondaryTextColor}"
+        },
+        position: "${position}",
+        size: "${size}",
+        welcomeMessage: "${welcomeMessage}",
+        collectName: ${collectName},
+        collectEmail: ${collectEmail},
+        collectPhone: ${collectPhone},
+        requireOtpVerification: ${requireOtp}
+      });
+    }
+  });
+<\/script>`;
+      
+      document.getElementById('embedCode').textContent = code;
+    }
+    
+    // Function to copy embed code to clipboard
+    function copyEmbedCode() {
+      const code = document.getElementById('embedCode').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('Code copied to clipboard!');
+      }).catch(err => {
+        console.error('Failed to copy code:', err);
+        alert('Failed to copy code');
+      });
+    }
+  </script>
+</body>
+</html>

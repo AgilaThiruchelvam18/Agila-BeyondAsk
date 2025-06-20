@@ -1,0 +1,64 @@
+Finalizing YouTube document 143 WITHOUT touching content field to preserve transcript
+Updating document 143 with data: {
+  status: 'processed',
+  metadata: {
+    youtube: {
+      title: 'The #1 Traffic Source I Used To Generate $2.3 Million in Profit By Selling Other People’s Products!',
+      views: 9391,
+      author: 'Anik Singal',
+      video_id: 'ohn6RwhHwn0',
+      source_url: 'https://www.youtube.com/watch?v=ohn6RwhHwn0',
+      publish_date: '20200925',
+      thumbnail_url: 'https://i.ytimg.com/vi/ohn6RwhHwn0/maxresdefault.jpg',
+      length_seconds: 534
+    },
+    custom_fields: {},
+    chunk_count: 11,
+    embedding_count: 11,
+    embedding_provider: 1,
+    isYoutubeDocument: true,
+    youtubeContentPreserved: true
+  },
+  processingInfo: {
+    step: 'completed',
+    text_length: 8678,
+    embeddings: 11,
+    finished_at: '2025-05-19T16:05:49.435Z'
+  },
+  updatedAt: 2025-05-19T16:05:49.435Z
+}
+Successfully processed YouTube video for document ID 143: 11 embeddings created
+Preserving existing YouTube document content for document 143
+Updating document 143 with data: {
+  processingInfo: { status_message: 'Creating embeddings', progress: 60 },
+  updatedAt: 2025-05-19T16:05:49.482Z
+}
+Creating embeddings for document 143 with 0 chunks
+Using normalized values: userId=4, knowledgeBaseId=26, namespace=user-4-kb-26
+Using numeric provider ID: 1
+Normalized providerId: 1 for embeddings
+Updating document 143 with data: {
+  processingInfo: { status_message: 'Finalizing document', progress: 80 },
+  updatedAt: 2025-05-19T16:05:49.533Z
+}
+Updating document 143 with data: {
+  status: 'processed',
+  content: null,
+  processingInfo: {
+    status_message: 'Processing complete',
+    progress: 100,
+    completed_at: 2025-05-19T16:05:51.090Z,
+    chunk_size: 1000,
+    chunk_overlap: 200
+  },
+  metadata: {
+    custom_fields: {},
+    chunk_count: 0,
+    embedding_count: 0,
+    embedding_provider: 1,
+    content_extracted: false,
+    extraction_date: '2025-05-19T16:05:51.090Z'
+  },
+  embeddingIds: [],
+  updatedAt: 2025-05-19T16:05:51.090Z
+}

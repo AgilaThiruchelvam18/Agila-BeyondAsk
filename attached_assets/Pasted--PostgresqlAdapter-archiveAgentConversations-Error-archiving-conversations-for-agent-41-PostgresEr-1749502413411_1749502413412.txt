@@ -1,0 +1,32 @@
+
+PostgresqlAdapter.archiveAgentConversations: Error archiving conversations for agent 41: PostgresError: syntax error at or near "where"
+    at ErrorResponse (file:///home/runner/workspace/node_modules/postgres/src/connection.js:788:26)
+    at handle (file:///home/runner/workspace/node_modules/postgres/src/connection.js:474:6)
+    at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)
+    at TLSSocket.emit (node:events:518:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23) {
+  severity_local: 'ERROR',
+  severity: 'ERROR',
+  code: '42601',
+  position: '29',
+  file: 'scan.l',
+  line: '1244',
+  routine: 'scanner_yyerror'
+}
+PostgresqlAdapter.deleteAgentKnowledgeBaseAssociations: Removing knowledge base associations for agent 41
+PostgresqlAdapter.deleteAgentActivities: Removing activity logs for agent 41
+PostgresqlAdapter.deleteAgentShares: Removing team resource permissions for agent 41
+PostgresqlAdapter.deleteAgentKnowledgeBaseAssociations: Cleared knowledge base associations for agent 41
+PostgresqlAdapter.deleteAgentActivities: Removed activity logs for agent 41
+PostgresqlAdapter.deleteAgentShares: Removed agent shares for agent 41
+PostgresqlAdapter.deleteAgent: Attempting to delete agent with ID 41
+PostgresqlAdapter.deleteAgent: Cannot delete agent 41 - it is used by 1 conversations
+PostgresqlAdapter.deleteAgent: Error deleting agent with ID 41: Error: Cannot delete agent because it is used by 1 conversations. Please delete those conversations first.
+    at PostgresqlAdapter.deleteAgent (/home/runner/workspace/server/postgresql-adapter.ts:1088:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/agent-routes.ts:352:5)
+Error deleting agent: Cannot delete agent because it is used by 1 conversations. Please delete those conversations first.
+8:51:44 PM [express] DELETE /api/agents/41 500 in 676ms :: {"success":false,"error":"Cannot delete a…

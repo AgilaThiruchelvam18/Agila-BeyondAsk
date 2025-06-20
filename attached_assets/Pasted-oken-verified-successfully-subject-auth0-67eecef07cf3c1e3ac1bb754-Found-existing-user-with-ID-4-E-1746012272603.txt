@@ -1,0 +1,74 @@
+oken verified successfully, subject: auth0|67eecef07cf3c1e3ac1bb754
+Found existing user with ID: 4
+Error retrieving team resource permissions: TypeError: teamManagementService.hasTeamAccess is not a function
+    at <anonymous> (/home/runner/workspace/server/routes.ts:8648:53)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:22:37 AM [express] GET /api/teams/12/permissions 500 in 42ms :: {"message":"Failed to retrieve tea…
+Token extracted from authorization header
+Decoded payload: {"iss":"https://dev-d8wu1dtr5o6osbml.us.auth0.com/","sub":"auth0|67eecef07cf3c1e3ac1bb754","aud":["https://dev-d8wu1dtr5o6osbml.us.auth0.com/api/v2/","https://dev-d8wu1dtr5o6osbml.us.auth0.com/userinfo"],"iat":1746007473,"exp":1746014673,"scope":"openid profile email","azp":"aVT07QHAv8rCCMjloxScp4up0EkxRYgr"}
+Token verified successfully, subject: auth0|67eecef07cf3c1e3ac1bb754
+Found existing user with ID: 4
+Error getting team resource permission: PostgresError: relation "team_resource_permissions" does not exist
+    at ErrorResponse (file:///home/runner/workspace/node_modules/postgres/src/connection.js:788:26)
+    at handle (file:///home/runner/workspace/node_modules/postgres/src/connection.js:474:6)
+    at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)
+    at TLSSocket.emit (node:events:518:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23) {
+  severity_local: 'ERROR',
+  severity: 'ERROR',
+  code: '42P01',
+  position: '89',
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+Error granting team resource access: PostgresError: relation "team_resource_permissions" does not exist
+    at ErrorResponse (file:///home/runner/workspace/node_modules/postgres/src/connection.js:788:26)
+    at handle (file:///home/runner/workspace/node_modules/postgres/src/connection.js:474:6)
+    at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)
+    at TLSSocket.emit (node:events:518:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23) {
+  severity_local: 'ERROR',
+  severity: 'ERROR',
+  code: '42P01',
+  position: '89',
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+11:22:43 AM [express] POST /api/teams/12/permissions 500 in 147ms :: {"message":"Failed to grant team…
+Token extracted from authorization header
+Decoded payload: {"iss":"https://dev-d8wu1dtr5o6osbml.us.auth0.com/","sub":"auth0|67eecef07cf3c1e3ac1bb754","aud":["https://dev-d8wu1dtr5o6osbml.us.auth0.com/api/v2/","https://dev-d8wu1dtr5o6osbml.us.auth0.com/userinfo"],"iat":1746007473,"exp":1746014673,"scope":"openid profile email","azp":"aVT07QHAv8rCCMjloxScp4up0EkxRYgr"}
+Token verified successfully, subject: auth0|67eecef07cf3c1e3ac1bb754
+Found existing user with ID: 4
+Error retrieving team resource permissions: TypeError: teamManagementService.hasTeamAccess is not a function
+    at <anonymous> (/home/runner/workspace/server/routes.ts:8648:53)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11:22:49 AM [express] GET /api/teams/12/permissions 500 in 42ms :: {"message":"Failed to retrieve tea…
+Token extracted from authorization header
+Decoded payload: {"iss":"https://dev-d8wu1dtr5o6osbml.us.auth0.com/","sub":"auth0|67eecef07cf3c1e3ac1bb754","aud":["https://dev-d8wu1dtr5o6osbml.us.auth0.com/api/v2/","https://dev-d8wu1dtr5o6osbml.us.auth0.com/userinfo"],"iat":1746007473,"exp":1746014673,"scope":"openid profile email","azp":"aVT07QHAv8rCCMjloxScp4up0EkxRYgr"}
+Token verified successfully, subject: auth0|67eecef07cf3c1e3ac1bb754
+Found existing user with ID: 4
+Error getting team resource permission: PostgresError: relation "team_resource_permissions" does not exist
+    at ErrorResponse (file:///home/runner/workspace/node_modules/postgres/src/connection.js:788:26)
+    at handle (file:///home/runner/workspace/node_modules/postgres/src/connection.js:474:6)
+    at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)
+    at TLSSocket.emit (node:events:518:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23) {
+  severity_local: 'ERROR',
+  severity: 'ERROR',
+  code: '42P01',
+  position: '89',
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}

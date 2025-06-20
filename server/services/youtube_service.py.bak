@@ -1,0 +1,790 @@
+import os
+import time
+import logging
+import tempfile
+import re
+import requests
+import json
+import xml.etree.ElementTree as ET
+from pytube import YouTube
+from pydub import AudioSegment
+import openai
+from typing import Tuple, Optional, Dict, Any, List
+import random
+import yt_dlp
+import base64
+import hashlib
+
+# Import YouTube Transcript API - with only available exceptions
+from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api._errors import (
+    TranscriptsDisabled,
+    NoTranscriptFound,
+    VideoUnavailable
+)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+class YouTubeService:
+    """Service for downloading and transcribing YouTube videos"""
+
+    def __init__(self):
+        """Initialize the YouTube service"""
+        self.api_key = os.environ.get("OPENAI_API_KEY")
+        if not self.api_key:
+            logger.warning("OPENAI_API_KEY not found in environment variables")
+
+        # Ensure the openai client is initialized with the API key
+        openai.api_key = self.api_key
+        self.client = openai.OpenAI(api_key=self.api_key)
+
+        # Create temp directory for downloads
+        self.temp_dir = tempfile.mkdtemp()
+        logger.info(f"Temporary directory created at: {self.temp_dir}")
+
+        # Set up user agents to rotate (this helps avoid blocking)
+        self.user_agents = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/90.0',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 11.5; rv:90.0) Gecko/20100101 Firefox/90.0',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_5_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Safari/605.1.15',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.69',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5.1 Safari/605.1.15'
+        ]
+
+        # Add more invidious instances
+        self.invidious_instances = [
+            "https://vid.puffyan.us",
+            "https://invidious.snopyta.org",
+            "https://invidious.kavin.rocks",
+            "https://yt.artemislena.eu",
+            "https://invidious.namazso.eu",
+            "https://inv.riverside.rocks",
+            "https://yewtu.be",
+            "https://invidious.flokinet.to",
+            "https://invidious.esmailelbob.xyz",
+            "https://invidious.nerdvpn.de"
+        ]
+
+        # Configure yt-dlp with more robust options
+        self.ydl_opts_base = {
+            'quiet': True,
+            'no_warnings': True,
+            'extract_flat': True,
+            'skip_download': True,
+            'format': 'best[ext=mp4]/best',
+            # Try to reduce the chance of being detected
+            'nocheckcertificate': True,
+            'socket_timeout': 15,
+            'retries': 10,
+            'fragment_retries': 10
+        }
+
+        # Set up proxy support for transcript API
+        self.use_proxy = False
+        self.proxies = self.load_proxies()
+
+    def load_proxies(self) -> List[Dict[str, str]]:
+        """
+        Load a list of proxies to use for transcript fetching
+
+        Returns:
+            List of proxy configurations
+        """
+        try:
+            # Example proxy configurations - in production, these should be loaded from a file or environment
+            proxies = [
+                {"http": "http://proxy1.example.com:8080", "https": "https://proxy1.example.com:8080"},
+                {"http": "http://proxy2.example.com:8080", "https": "https://proxy2.example.com:8080"},
+                # Add more proxies as needed
+            ]
+
+            # Check if there are environment variables for proxies
+            env_proxy = os.environ.get("HTTP_PROXY")
+            env_proxy_https = os.environ.get("HTTPS_PROXY")
+
+            if env_proxy:
+                proxies.append({"http": env_proxy, "https": env_proxy_https if env_proxy_https else env_proxy})
+
+            return proxies
+        except Exception as e:
+            logger.error(f"Error loading proxies: {str(e)}")
+            return []
+
+    def get_random_user_agent(self):
+        """Get a random user agent to avoid detection"""
+        return random.choice(self.user_agents)
+
+    def get_random_proxy(self) -> Optional[Dict[str, str]]:
+        """
+        Get a random proxy from the list
+
+        Returns:
+            Proxy configuration dictionary or None if no proxies available
+        """
+        if not self.proxies:
+            return None
+        return random.choice(self.proxies)
+
+    def get_transcript_with_youtube_transcript_api(self, video_id: str) -> Optional[str]:
+        """
+        Get transcript using the YouTube Transcript API with retry and fallback mechanisms
+
+        Args:
+            video_id: YouTube video ID
+
+        Returns:
+            Transcript text or None if not available
+        """
+        try:
+            logger.info(f"Attempting to get transcript with YouTube Transcript API for video ID: {video_id}")
+
+            # Try with different languages and fallbacks
+            languages = ['en', 'en-US', 'en-GB', 'en-CA', 'en-AU']
+
+            # First try with standard options
+            try:
+                transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+
+                # Try to get English transcript first
+                try:
+                    transcript = transcript_list.find_transcript(languages)
+                    transcript_data = transcript.fetch()
+
+                    # Process and join all text segments
+                    transcript_text = ' '.join([entry['text'] for entry in transcript_data])
+                    logger.info(f"Successfully retrieved transcript with YouTube Transcript API: {len(transcript_text)} characters")
+                    return transcript_text
+
+                except NoTranscriptFound:
+                    # If no English transcript found, try auto-generated captions
+                    logger.info("No manual English transcript found, trying auto-generated captions")
+                    for transcript in transcript_list:
+                        # If we find an auto-generated transcript in any language
+                        if transcript.is_generated:
+                            # Try to translate it to English if needed
+                            if transcript.language_code not in languages:
+                                transcript = transcript.translate('en')
+
+                            transcript_data = transcript.fetch()
+                            transcript_text = ' '.join([entry['text'] for entry in transcript_data])
+                            logger.info(f"Successfully retrieved auto-generated transcript: {len(transcript_text)} characters")
+                            return transcript_text
+
+            except (TranscriptsDisabled, NoTranscriptFound, VideoUnavailable) as e:
+                logger.warning(f"YouTube Transcript API primary method failed: {str(e)}")
+
+                # Try the direct approach with proper error handling
+                try:
+                    transcript_data = YouTubeTranscriptApi.get_transcript(video_id, languages=languages)
+                    transcript_text = ' '.join([entry['text'] for entry in transcript_data])
+                    logger.info(f"Successfully retrieved transcript with direct method: {len(transcript_text)} characters")
+                    return transcript_text
+                except Exception as e2:
+                    logger.warning(f"Direct transcript method failed: {str(e2)}")
+
+            except Exception as e_rate_limit:
+                logger.warning(f"YouTube Transcript API rate limited or other error: {str(e_rate_limit)}")
+
+                # Check if it's likely a rate limit issue by looking at the error message
+                if "429" in str(e_rate_limit) or "too many requests" in str(e_rate_limit).lower() or "rate limit" in str(e_rate_limit).lower():
+                    logger.warning("Detected likely rate limiting, trying with proxy...")
+
+                    # If we get rate limited, try with a proxy if available
+                    if self.proxies:
+                        for _ in range(3):  # Try a few different proxies
+                            proxy = self.get_random_proxy()
+                            if not proxy:
+                                continue
+
+                            try:
+                                # Use a proxy and custom headers for the request
+                                # This is a simplified example - in a real implementation, you would need to
+                                # configure the YouTubeTranscriptApi to use proxies or make the request manually
+                                headers = {'User-Agent': self.get_random_user_agent()}
+
+                                # Here we would configure the transcript API to use the proxy
+                                # Since the API doesn't directly support proxies, we would implement a custom solution
+                                # This is a placeholder for that implementation
+                                time.sleep(random.uniform(1, 3))  # Random delay to avoid detection
+
+                                # This is where the proxy implementation would go
+                                # For now, we'll try the direct approach again with delay
+                                transcript_data = YouTubeTranscriptApi.get_transcript(video_id, languages=languages)
+                                transcript_text = ' '.join([entry['text'] for entry in transcript_data])
+                                logger.info(f"Successfully retrieved transcript with delay: {len(transcript_text)} characters")
+                                return transcript_text
+
+                            except Exception as e_proxy:
+                                logger.warning(f"Proxy attempt failed: {str(e_proxy)}")
+                                continue
+
+            # If all attempts with the YouTube Transcript API fail, return None
+            logger.warning("All YouTube Transcript API methods failed")
+            return None
+
+        except Exception as e:
+            logger.error(f"Error in YouTube Transcript API method: {str(e)}")
+            return None
+
+    def download_audio_with_yt_dlp(self, video_url: str) -> Optional[str]:
+        """
+        Download audio using yt-dlp as a fallback method
+
+        Args:
+            video_url: URL of the YouTube video
+
+        Returns:
+            Path to the downloaded audio file or None if download failed
+        """
+        try:
+            logger.info(f"Attempting to download with yt-dlp: {video_url}")
+
+            output_path = os.path.join(self.temp_dir, "audio.mp3")
+
+            # Generate a random client identity
+            random_id = hashlib.md5(os.urandom(8)).hexdigest()[:8]
+
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'outtmpl': output_path,
+                'noplaylist': True,
+                'quiet': True,
+                'no_warnings': True,
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '192',
+                }],
+                # Additional options to try to bypass restrictions
+                'nocheckcertificate': True,
+                'socket_timeout': 15,
+                'retries': 10,
+                'fragment_retries': 10,
+                'hls_prefer_native': False,
+                'extractor_retries': 10,
+                'http_headers': {
+                    'User-Agent': self.get_random_user_agent(),
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.5',
+                    'Connection': 'keep-alive',
+                    'Upgrade-Insecure-Requests': '1',
+                    'Sec-Fetch-Dest': 'document',
+                    'Sec-Fetch-Mode': 'navigate',
+                    'Sec-Fetch-Site': 'none',
+                    'Sec-Fetch-User': '?1',
+                    'TE': 'trailers',
+                    'X-YouTube-Client-Name': '1',
+                    'X-YouTube-Client-Version': '2.20230526.01.00'
+                },
+                'cookies': f'/tmp/youtube-cookies-{random_id}.txt'  # Use a random cookie file
+            }
+
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(video_url, download=True)
+
+            if os.path.exists(output_path):
+                logger.info(f"yt-dlp download successful: {output_path}")
+                return output_path
+            else:
+                # Try to find the downloaded file which might have a different extension
+                for file in os.listdir(self.temp_dir):
+                    file_path = os.path.join(self.temp_dir, file)
+                    if os.path.isfile(file_path) and file.startswith("audio"):
+                        logger.info(f"yt-dlp download found at different path: {file_path}")
+                        return file_path
+
+                logger.error("yt-dlp download completed but file not found")
+                return None
+
+        except Exception as e:
+            logger.error(f"Error downloading with yt-dlp: {str(e)}")
+            return None
+
+    def get_transcript_from_proxy_service(self, video_id: str) -> Optional[str]:
+        """
+        Try to get transcript using youtube_transcript_api through a proxy service
+
+        Args:
+            video_id: YouTube video ID
+
+        Returns:
+            Transcript text or None if not available
+        """
+        try:
+            # This is a hypothetical API that might help - replace with a real service if available
+            transcript_proxy_urls = [
+                f"https://youtubetranscript.com/api/v1/transcript/{video_id}",
+                f"https://youtranscript.net/api/{video_id}",
+                f"https://transcript-proxy.herokuapp.com/api/transcript/{video_id}"
+            ]
+
+            for url in transcript_proxy_urls:
+                for user_agent in self.user_agents:
+                    try:
+                        headers = {
+                            'User-Agent': user_agent,
+                            'Accept': 'application/json'
+                        }
+
+                        response = requests.get(url, headers=headers, timeout=10)
+
+                        if response.status_code == 200:
+                            try:
+                                data = response.json()
+                                if 'transcript' in data:
+                                    return data['transcript']
+                            except:
+                                pass
+
+                        time.sleep(1)
+                    except:
+                        continue
+
+            return None
+
+        except Exception as e:
+            logger.error(f"Error getting transcript through proxy API: {str(e)}")
+            return None
+
+    def get_full_transcript_with_enhanced_yt_dlp(self, video_url: str) -> Optional[str]:
+        """
+        Attempt to get full transcript using an enhanced yt-dlp configuration
+
+        Args:
+            video_url: URL of the YouTube video
+
+        Returns:
+            Transcript text or None if not available
+        """
+        try:
+            logger.info(f"Attempting to get full transcript with enhanced yt-dlp: {video_url}")
+
+            # Create a unique filename for this attempt
+            random_id = hashlib.md5(os.urandom(8)).hexdigest()[:8]
+            subtitle_path = os.path.join(self.temp_dir, f"subs-{random_id}")
+
+            # Set up advanced options for yt-dlp
+            ydl_opts = {
+                'writesubtitles': True,
+                'writeautomaticsub': True,
+                'subtitleslangs': ['en', 'en-US', 'en-GB', 'en-CA', 'en-AU'],
+                'skip_download': True,
+                'outtmpl': subtitle_path,
+                'quiet': True,
+                'no_warnings': True,
+                # Additional options to try to bypass restrictions
+                'nocheckcertificate': True,
+                'socket_timeout': 15,
+                'retries': 10,
+                'fragment_retries': 10,
+                'hls_prefer_native': False,
+                'extractor_retries': 10,
+                'http_headers': {
+                    'User-Agent': self.get_random_user_agent(),
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.5',
+                    'Connection': 'keep-alive',
+                    'Upgrade-Insecure-Requests': '1',
+                    'Sec-Fetch-Dest': 'document',
+                    'Sec-Fetch-Mode': 'navigate',
+                    'Sec-Fetch-Site': 'none',
+                    'Sec-Fetch-User': '?1',
+                    'TE': 'trailers',
+                    'X-YouTube-Client-Name': '1',
+                    'X-YouTube-Client-Version': '2.20230526.01.00'
+                },
+                'cookies': f'/tmp/youtube-cookies-{random_id}.txt'  # Use a random cookie file
+            }
+
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(video_url, download=False)
+
+                metadata = {
+                    "title": info.get('title', 'Unknown'),
+                    "author": info.get('uploader', 'Unknown'),
+                    "length_seconds": info.get('duration', 0),
+                    "views": info.get('view_count', 0),
+                    "publish_date": info.get('upload_date', None),
+                    "video_id": info.get('id', None),
+                    "thumbnail_url": info.get('thumbnail', None),
+                    "source_url": video_url
+                }
+        except Exception as e:
+            logger.error(f"Error getting metadata with yt-dlp: {str(e)}")
+            # Set default metadata as fallback
+            metadata = {
+                "title": "Unknown",
+                "source_url": video_url
+            }
+
+        # Extract video ID
+        video_id = self.extract_video_id(video_url)
+        if not video_id:
+            logger.error(f"Failed to extract video ID from URL: {video_url}")
+            return None, metadata
+
+        # Try different methods to get video content
+        logger.info(f"Processing YouTube video ID: {video_id}")
+
+        # METHOD 1 (NEW): Try YouTube Transcript API first
+        logger.info("Method 1: Trying the YouTube Transcript API...")
+        transcript_from_api = self.get_transcript_with_youtube_transcript_api(video_id)
+
+        if transcript_from_api and len(transcript_from_api) > 500:  # Check that we got substantial content
+            logger.info(f"Successfully retrieved transcript with YouTube Transcript API: {len(transcript_from_api)} characters")
+            processed_text = self.summarize_transcript(transcript_from_api)
+            return processed_text, metadata
+
+        # METHOD 2: Try getting transcript from proxy service
+        logger.info("Method 2: Trying to get transcript from proxy service...")
+        proxy_transcript = self.get_transcript_from_proxy_service(video_id)
+
+        if proxy_transcript and len(proxy_transcript) > 500:
+            logger.info(f"Successfully retrieved transcript from proxy service: {len(proxy_transcript)} characters")
+            processed_text = self.summarize_transcript(proxy_transcript)
+            return processed_text, metadata
+
+        # METHOD 3: Try getting full transcript with enhanced yt-dlp options
+        logger.info("Method 3: Trying to get full transcript with enhanced yt-dlp...")
+        full_transcript = self.get_full_transcript_with_enhanced_yt_dlp(video_url)
+
+        if full_transcript and len(full_transcript) > 500:  # Check that we got substantial content
+            logger.info(f"Successfully retrieved full transcript with enhanced yt-dlp: {len(full_transcript)} characters")
+            processed_text = self.summarize_transcript(full_transcript)
+            return processed_text, metadata
+
+        # METHOD 4: Try transcript from invidious with enhanced options
+        logger.info("Method 4: Trying to get transcript from invidious with enhanced options...")
+        enhanced_invidious_transcript = self.get_transcript_from_invidious_with_enhanced_options(video_id)
+
+        if enhanced_invidious_transcript and len(enhanced_invidious_transcript) > 500:
+            logger.info(f"Successfully retrieved transcript from invidious with enhanced options: {len(enhanced_invidious_transcript)} characters")
+            processed_text = self.summarize_transcript(enhanced_invidious_transcript)
+            return processed_text, metadata
+
+        # METHOD 5: Try downloading and transcribing the audio as a last resort
+        logger.info("Method 5: Trying to download and transcribe audio...")
+        audio_file = self.download_audio_with_yt_dlp(video_url)
+        transcript = None
+
+        if audio_file:
+            try:
+                # Transcribe the audio
+                transcript = self.transcribe_audio(audio_file)
+
+                # Clean up the audio file
+                if os.path.exists(audio_file):
+                    os.remove(audio_file)
+
+                if transcript:
+                    logger.info(f"Successfully transcribed audio: {len(transcript)} characters")
+                    processed_text = self.summarize_transcript(transcript)
+                    return processed_text, metadata
+
+            except Exception as e:
+                logger.error(f"Error processing audio: {str(e)}")
+                # Clean up the audio file if it exists
+                if audio_file and os.path.exists(audio_file):
+                    os.remove(audio_file)
+
+        # FALLBACK: Get whatever we can
+        logger.error("All content extraction methods failed, using metadata as fallback")
+
+        # If all methods failed, try to at least return metadata in a structured format
+        title = metadata.get("title", "Unknown")
+        author = metadata.get("author", "Unknown")
+
+        fallback_text = f"Title: {title}\nAuthor: {author}\n\n"
+
+        # Use whatever partial content we might have obtained
+        if transcript_from_api:
+            fallback_text += "Partial Content:\n" + transcript_from_api
+        elif proxy_transcript:
+            fallback_text += "Partial Content:\n" + proxy_transcript
+        elif full_transcript:
+            fallback_text += "Partial Content:\n" + full_transcript
+        elif enhanced_invidious_transcript:
+            fallback_text += "Partial Content:\n" + enhanced_invidious_transcript
+        else:
+            fallback_text += "Unable to extract content from this YouTube video."
+
+        # Look for subtitle files
+        potential_subtitle_files = []
+        for ext in ['vtt', 'srt', 'ttml', 'srv1', 'srv2', 'srv3']:
+            for lang in ['en', 'en-US', 'en-GB', 'en-CA', 'en-AU']:
+                potential_file = f"{subtitle_path}.{lang}.{ext}"
+                if os.path.exists(potential_file):
+                    potential_subtitle_files.append(potential_file)
+                    
+        # Process subtitle files if found
+        if potential_subtitle_files:
+            # Use the first subtitle file found
+            subtitle_file = potential_subtitle_files[0]
+            logger.info(f"Found subtitle file: {subtitle_file}")
+
+            with open(subtitle_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            # Parse subtitles based on file extension
+            if subtitle_file.endswith('.vtt'):
+                # Parse WebVTT
+                lines = []
+                for line in content.split('\n'):
+                    line = line.strip()
+                    # Skip timestamps, headers, and empty lines
+                    if line and not line.startswith('WEBVTT') and not re.match(r'^\d{2}:\d{2}', line) and not re.match(r'^\d{2}:\d{2}:\d{2}', line) and not re.match(r'^-->$', line):
+                        lines.append(line)
+                return ' '.join(lines)
+            elif subtitle_file.endswith('.srt'):
+                # Parse SRT
+                lines = []
+                for line in content.split('\n'):
+                    line = line.strip()
+                    # Skip timestamps, indexes, and empty lines
+                    if line and not re.match(r'^\d+$', line) and not re.match(r'^\d{2}:\d{2}', line) and not re.match(r'^-->$', line):
+                        lines.append(line)
+                return ' '.join(lines)
+            else:
+                # Generic parsing for other formats
+                return re.sub(r'\s+', ' ', content)
+
+        # If no subtitle files, try to use the transcript from info if available
+        if info and 'subtitles' in info and info['subtitles']:
+            for lang in ['en', 'en-US', 'en-GB', 'en-CA', 'en-AU']:
+                if lang in info['subtitles']:
+                    return f"Transcript from subtitles: {info['subtitles'][lang]}"
+
+        # If still no transcript, use description and title as fallback
+        title = info.get('title', '') if info else ''
+        description = info.get('description', '') if info else ''
+        if title and description:
+            return f"Title: {title}\n\nDescription: {description}"
+
+        # If we got to this point, return None
+        return "Unable to extract content from this YouTube video."
+        
+    except Exception as e:
+        logger.error(f"Error getting full transcript with enhanced yt-dlp: {str(e)}")
+        return None
+
+    def get_transcript_from_invidious_with_enhanced_options(self, video_id: str) -> Optional[str]:
+        """
+        Get transcript using invidious instances with enhanced options
+
+        Args:
+            video_id: YouTube video ID
+
+        Returns:
+            Transcript text or None if not available
+        """
+        try:
+            logger.info(f"Trying to get transcript from invidious with enhanced options for video ID: {video_id}")
+
+            # Shuffle instances to distribute load
+            random.shuffle(self.invidious_instances)
+
+            for instance in self.invidious_instances:
+                # Shuffle user agents for each instance
+                random.shuffle(self.user_agents)
+
+                for user_agent in self.user_agents:
+                    try:
+                        headers = {
+                            'User-Agent': user_agent,
+                            'Accept': 'application/json',
+                            'Connection': 'keep-alive',
+                            'Referer': instance,
+                            'Sec-Fetch-Dest': 'empty',
+                            'Sec-Fetch-Mode': 'cors',
+                            'Sec-Fetch-Site': 'same-origin',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+
+                        # First try direct transcript API
+                        api_url = f"{instance}/api/v1/captions/{video_id}"
+                        response = requests.get(api_url, headers=headers, timeout=10)
+
+                        if response.status_code == 200:
+                            try:
+                                data = response.json()
+
+                                if isinstance(data, list) and len(data) > 0:
+                                    # Process the captions list
+                                    captions_text = []
+                                    for caption_item in data:
+                                        if 'label' in caption_item and caption_item['label'].startswith('en'):
+                                            # Get English captions
+                                            caption_url = f"{instance}/api/v1/captions/{video_id}?label={caption_item['label']}"
+                                            caption_response = requests.get(caption_url, headers=headers, timeout=10)
+
+                                            if caption_response.status_code == 200:
+                                                try:
+                                                    caption_data = caption_response.json()
+                                                    if 'captions' in caption_data:
+                                                        for caption in caption_data['captions']:
+                                                            if 'text' in caption:
+                                                                captions_text.append(caption['text'])
+                                                except:
+                                                    pass
+
+                                    if captions_text:
+                                        return ' '.join(captions_text)
+                            except:
+                                pass
+
+                        # Try getting video data with detailed information
+                        video_url = f"{instance}/api/v1/videos/{video_id}"
+                        video_response = requests.get(video_url, headers=headers, timeout=10)
+
+                        if video_response.status_code == 200:
+                            try:
+                                video_data = video_response.json()
+
+                                # Try to extract captions list first
+                                if 'captions' in video_data and video_data['captions']:
+                                    for caption in video_data['captions']:
+                                        if caption.get('languageCode', '').startswith('en'):
+                                            # Get English captions
+                                            cap_url = f"{instance}/api/v1/captions/{video_id}?label={caption.get('label')}"
+                                            cap_response = requests.get(cap_url, headers=headers, timeout=10)
+
+                                            if cap_response.status_code == 200:
+                                                try:
+                                                    cap_data = cap_response.json()
+                                                    if 'captions' in cap_data:
+                                                        lines = []
+                                                        for line in cap_data['captions']:
+                                                            if 'text' in line:
+                                                                lines.append(line['text'])
+
+                                                        if lines:
+                                                            return ' '.join(lines)
+                                                except:
+                                                    pass
+
+                                # Fall back to description and chapter information
+                                transcript = []
+
+                                # Add title
+                                if 'title' in video_data:
+                                    transcript.append(f"Title: {video_data['title']}")
+
+                                # Add chapters if available
+                                if 'chapters' in video_data and video_data['chapters']:
+                                    transcript.append("\nChapters:")
+                                    for chapter in video_data['chapters']:
+                                        start_time = chapter.get('start', 0) / 1000  # Convert to seconds
+                                        minutes = int(start_time // 60)
+                                        seconds = int(start_time % 60)
+                                        transcript.append(f"{minutes}:{seconds:02d} - {chapter.get('title', 'Unknown')}")
+
+                                # Add description
+                                if 'description' in video_data and video_data['description']:
+                                    transcript.append(f"\nDescription:\n{video_data['description']}")
+
+                                # Add metadata
+                                if 'author' in video_data:
+                                    transcript.append(f"\nAuthor: {video_data['author']}")
+
+                                if 'publishedText' in video_data:
+                                    transcript.append(f"Published: {video_data['publishedText']}")
+
+                                if transcript:
+                                    return '\n'.join(transcript)
+                            except:
+                                pass
+                    except:
+                        continue
+
+                    time.sleep(0.5)  # Small pause between user agents
+
+                time.sleep(1)  # Small pause between instances
+
+            return None
+
+        except Exception as e:
+            logger.error(f"Error getting transcript from invidious with enhanced options: {str(e)}")
+            return None
+
+    def extract_video_id(self, youtube_url: str) -> Optional[str]:
+        """
+        Extract the video ID from a YouTube URL
+
+        Args:
+            youtube_url: URL of the YouTube video
+
+        Returns:
+            YouTube video ID or None if not found
+        """
+        try:
+            # Try multiple regex patterns for different URL formats
+            patterns = [
+                r'(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\?\/]+)',
+                r'(?:youtube\.com\/embed\/)([^&\?\/]+)',
+                r'(?:youtube\.com\/v\/)([^&\?\/]+)',
+                r'(?:youtube\.com\/user\/\w+\/\w+\/[^&\?\/]+)',
+            ]
+
+            for pattern in patterns:
+                match = re.search(pattern, youtube_url)
+                if match:
+                    return match.group(1)
+
+            # If no match found, try yt-dlp as fallback
+            try:
+                # Try yt-dlp
+                ydl_opts = {
+                    'quiet': True,
+                    'no_warnings': True,
+                    'skip_download': True,
+                    'extract_flat': True,
+                    'force_generic_extractor': False
+                }
+
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    info = ydl.extract_info(youtube_url, download=False)
+                    return info.get('id')
+
+            except Exception as e:
+                logger.warning(f"Failed to extract video ID using yt-dlp: {str(e)}")
+
+            return None
+
+        except Exception as e:
+            logger.error(f"Error extracting video ID: {str(e)}")
+            return None
+
+    def process_youtube_url(self, video_url: str) -> Tuple[Optional[str], Optional[Dict[str, Any]]]:
+        """
+        Process a YouTube URL to extract transcript and metadata
+
+        Args:
+            video_url: URL of the YouTube video
+
+        Returns:
+            Tuple containing (transcript text, metadata dictionary)
+        """
+        # Get metadata first with enhanced options
+        metadata = None
+        try:
+            # Try to get metadata with yt-dlp directly first
+            logger.info(f"Getting metadata with yt-dlp: {video_url}")
+
+            ydl_opts = {
+                'quiet': True,
+                'no_warnings': True,
+                'skip_download': True,
+                'extract_flat': True,
+                'force_generic_extractor': False,
+                'http_headers': {
+                    'User-Agent': self.get_random_user_agent()
+                }
+            }
+
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(video_url, download=False)

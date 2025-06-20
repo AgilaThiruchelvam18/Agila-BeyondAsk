@@ -1,0 +1,144 @@
+Replit Agent Prompt: Build Visual Workflow Automation Builder in BeyondAsk
+🟦 Task
+Develop a drag-and-drop, no-code workflow automation builder for the BeyondAsk platform. Users should be able to:
+
+Define triggers
+
+Select and configure AI agents
+
+Route the output to integrations (APIs, webhooks, third-party services)
+
+Save and run workflows on demand or in response to real-time events
+
+This feature should work similarly to Zapier or n8n.
+
+🎯 Core Capabilities
+1. Visual Builder Interface
+Drag-and-drop or flowchart-based builder UI
+
+Nodes represent:
+
+Triggers
+
+Actions (AI agent calls)
+
+Integrations (e.g., SendGrid, webhook, Slack)
+
+Users can connect nodes to form a logic path
+
+Display input/output for each node inline for clarity
+
+2. Workflow Triggers
+Support the following trigger types:
+
+Manual trigger (for testing/debugging)
+
+Webhook trigger (auto-generated URL to start workflow)
+
+Schedule trigger (e.g., daily at 9AM)
+
+API trigger (via internal event or 3rd-party hook)
+
+Example Trigger:
+
+json
+Copy
+Edit
+{
+  "type": "webhook",
+  "url": "https://yourdomain.com/api/v1/workflows/trigger/:workflowId"
+}
+3. Agent Node (AI Action)
+Let users select from their own or predefined agents
+
+Provide inputs for:
+
+Prompt/message template
+
+Agent ID
+
+Dynamic inputs (e.g., userName, userEmail)
+
+Support memory and metadata handling if enabled
+
+Node runs /api/v1/agents/:agentId/chat under the hood
+
+4. Target Integrations
+Support output targets such as:
+
+Webhook (POST response to URL)
+
+Email (via SendGrid)
+
+Slack message
+
+Airtable or Google Sheets row update
+
+JSON return for API response
+
+Each integration node should allow mapping of fields from previous nodes.
+
+5. Dynamic Variables & Mapping
+Allow users to map outputs from one node to inputs in the next
+
+Example: Use AI-generated email as the body in a SendGrid email node
+
+📁 Workflow Metadata & Storage
+Store workflows as JSON configs in the database
+
+json
+Copy
+Edit
+{
+  "id": "welcome_email_flow",
+  "name": "Welcome Email Generator",
+  "nodes": [ ... ],
+  "connections": [ ... ],
+  "trigger": { "type": "webhook", "url": "..." },
+  "createdBy": "user123"
+}
+Include:
+
+Workflow name and description
+
+List of nodes (with type, settings)
+
+Connections (edges)
+
+Status (active, draft, paused)
+
+⚙️ Execution Engine
+On trigger, execute nodes in sequence based on connections
+
+Pass output from one node to the next
+
+Include error handling and status reporting
+
+Enable testing mode to preview outputs step-by-step
+
+🛡️ Security
+Only allow users to run workflows they created
+
+Protect webhooks using secret tokens or API key validation
+
+Rate-limit executions per user/team
+
+🌐 Language & Preferences
+Replit Agent Language: English
+
+Interface Language: English
+
+Output from AI agents may support multilingual content depending on input
+
+✅ Summary of Goals
+This feature will allow your users to:
+
+Automate business and marketing tasks
+
+Build dynamic workflows like:
+
+"When webhook is triggered → Generate email via agent → Send with SendGrid"
+
+"Every Monday → Summarize meeting notes → Post to Slack"
+
+Integrate AI into their tools and data pipelines without code

@@ -1,0 +1,571 @@
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { CalendarIcon, Clock, RefreshCw } from "lucide-react";
+import { format } from "date-fns";
+
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+
+interface ScheduledUpdateDialogProps {
+  knowledgeBaseId: number;
+  trigger?: React.ReactNode;
+}
+
+// Define the form schema
+const formSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  frequency: z.enum(["hourly", "daily", "weekly", "monthly", "custom"]),
+  interval: z.number().int().positive(),
+  dayOfWeek: z.number().int().min(0).max(6).optional(),
+  dayOfMonth: z.number().int().min(1).max(31).optional(),
+  specificTime: z.string().optional(),
+  customCron: z.string().optional(),
+  refreshUrls: z.boolean().default(true),
+  refreshPdfs: z.boolean().default(true),
+  refreshYoutubeVideos: z.boolean().default(true),
+  onlyOutdated: z.boolean().default(false),
+  specificTags: z.array(z.string()).optional(),
+  specificDocumentIds: z.array(z.number()).optional(),
+  isActive: z.boolean().default(true),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+export function ScheduledUpdateDialog({ knowledgeBaseId, trigger }: ScheduledUpdateDialogProps) {
+  const [open, setOpen] = useState(false);
+  const { toast } = useToast();
+  
+  // Load any existing scheduled update for this knowledge base
+  const { data: scheduledUpdates, isLoading } = useQuery({
+    queryKey: ['/api/scheduled-knowledge-updates', knowledgeBaseId],
+    queryFn: () => 
+      apiRequest(`/api/scheduled-knowledge-updates?knowledgeBaseId=${knowledgeBaseId}`)
+        .then(res => res.json()),
+    enabled: !!knowledgeBaseId,
+  });
+
+  // Load all document tags for selection
+  const { data: documents } = useQuery({
+    queryKey: ['/api/knowledge-bases', knowledgeBaseId, 'documents'],
+    queryFn: () => 
+      apiRequest(`/api/knowledge-bases/${knowledgeBaseId}/documents`)
+        .then(res => res.json()),
+    enabled: !!knowledgeBaseId && open,
+  });
+
+  // Get unique tags from all documents and ensure they're string type
+  const availableTags: string[] = documents 
+    ? Array.from(new Set(documents.flatMap((doc: any) => doc.tags || []).filter(Boolean)))
+    : [];
+
+  // Create or update scheduled update
+  const mutation = useMutation({
+    mutationFn: (data: FormValues) => {
+      const existingUpdate = scheduledUpdates?.[0];
+      const endpoint = existingUpdate 
+        ? `/api/scheduled-knowledge-updates/${existingUpdate.id}`
+        : '/api/scheduled-knowledge-updates';
+      
+      const method = existingUpdate ? 'PATCH' : 'POST';
+      
+      const payload = {
+        ...data,
+        knowledgeBaseIds: [knowledgeBaseId],
+        options: {
+          refreshUrls: data.refreshUrls,
+          refreshPdfs: data.refreshPdfs,
+          refreshYoutubeVideos: data.refreshYoutubeVideos,
+          onlyOutdated: data.onlyOutdated,
+          specificTags: data.specificTags || [],
+          specificDocumentIds: data.specificDocumentIds || [],
+        },
+      };
+      
+      return apiRequest(endpoint, {
+        method,
+        data: payload,
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Scheduled update saved successfully",
+      });
+      setOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['/api/scheduled-knowledge-updates'] });
+    },
+    onError: (error) => {
+      console.error("Failed to save scheduled update:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save scheduled update",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Initialize form with existing data or defaults
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      frequency: "daily",
+      interval: 1,
+      refreshUrls: true,
+      refreshPdfs: true,
+      refreshYoutubeVideos: true,
+      onlyOutdated: false,
+      isActive: true,
+    },
+  });
+
+  // Load existing data into form when available
+  useEffect(() => {
+    if (scheduledUpdates && scheduledUpdates.length > 0) {
+      const update = scheduledUpdates[0];
+      
+      form.reset({
+        name: update.name,
+        frequency: update.schedule.frequency,
+        interval: update.schedule.interval,
+        dayOfWeek: update.schedule.dayOfWeek,
+        dayOfMonth: update.schedule.dayOfMonth,
+        specificTime: update.schedule.specificTime,
+        customCron: update.schedule.customCron,
+        refreshUrls: update.options?.refreshUrls ?? true,
+        refreshPdfs: update.options?.refreshPdfs ?? true,
+        refreshYoutubeVideos: update.options?.refreshYoutubeVideos ?? true,
+        onlyOutdated: update.options?.onlyOutdated ?? false,
+        specificTags: update.options?.specificTags || [],
+        specificDocumentIds: update.options?.specificDocumentIds || [],
+        isActive: update.isActive,
+      });
+    }
+  }, [scheduledUpdates, form]);
+
+  const onSubmit = (data: FormValues) => {
+    mutation.mutate(data);
+  };
+
+  // Generate time options for dropdown
+  const timeOptions = Array.from({ length: 24 }, (_, hour) => [
+    `${hour.toString().padStart(2, '0')}:00`,
+    `${hour.toString().padStart(2, '0')}:30`
+  ]).flat();
+
+  // Get form values
+  const frequency = form.watch("frequency");
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger || (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" className="p-2" onClick={() => setOpen(true)}>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Schedule Updates</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Schedule Knowledge Base Updates</DialogTitle>
+          <DialogDescription>
+            Automatically refresh documents in this knowledge base on a schedule.
+          </DialogDescription>
+        </DialogHeader>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Schedule Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Weekly document refresh" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    A descriptive name for this scheduled update
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="frequency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Frequency</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select frequency" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="hourly">Hourly</SelectItem>
+                        <SelectItem value="daily">Daily</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="custom">Custom</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      How often to refresh the documents
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="interval"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Interval</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        min={1} 
+                        {...field} 
+                        onChange={(e) => field.onChange(parseInt(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Run every {field.value} {frequency}{field.value > 1 ? 's' : ''}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {frequency === "weekly" && (
+              <FormField
+                control={form.control}
+                name="dayOfWeek"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Day of Week</FormLabel>
+                    <Select 
+                      onValueChange={(value) => field.onChange(parseInt(value))} 
+                      defaultValue={field.value?.toString() || "0"}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select day" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="0">Sunday</SelectItem>
+                        <SelectItem value="1">Monday</SelectItem>
+                        <SelectItem value="2">Tuesday</SelectItem>
+                        <SelectItem value="3">Wednesday</SelectItem>
+                        <SelectItem value="4">Thursday</SelectItem>
+                        <SelectItem value="5">Friday</SelectItem>
+                        <SelectItem value="6">Saturday</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {frequency === "monthly" && (
+              <FormField
+                control={form.control}
+                name="dayOfMonth"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Day of Month</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        min={1} 
+                        max={31} 
+                        {...field} 
+                        onChange={(e) => field.onChange(parseInt(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Day of the month (1-31)
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {(frequency === "daily" || frequency === "weekly" || frequency === "monthly") && (
+              <FormField
+                control={form.control}
+                name="specificTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Time</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select time" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {timeOptions.map((time) => (
+                          <SelectItem key={time} value={time}>
+                            {time}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      What time to run the update
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {frequency === "custom" && (
+              <FormField
+                control={form.control}
+                name="customCron"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Custom Cron Expression</FormLabel>
+                    <FormControl>
+                      <Input placeholder="0 0 * * *" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Advanced: Enter a cron expression (e.g., "0 0 * * *" for daily at midnight)
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            <Separator />
+            
+            <div>
+              <h3 className="text-base font-medium mb-2">Document Options</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="refreshUrls"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center space-x-2 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Refresh URL content</FormLabel>
+                        <FormDescription>
+                          Update documents from web pages
+                        </FormDescription>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="refreshPdfs"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center space-x-2 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Refresh PDF content</FormLabel>
+                        <FormDescription>
+                          Re-process PDF documents
+                        </FormDescription>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="refreshYoutubeVideos"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center space-x-2 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Refresh YouTube videos</FormLabel>
+                        <FormDescription>
+                          Update transcripts from videos
+                        </FormDescription>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="onlyOutdated"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center space-x-2 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Only refresh outdated</FormLabel>
+                        <FormDescription>
+                          Skip recently updated documents
+                        </FormDescription>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+            
+            {availableTags && availableTags.length > 0 && (
+              <FormField
+                control={form.control}
+                name="specificTags"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Filter by Tags (Optional)</FormLabel>
+                    <FormControl>
+                      <div className="flex flex-wrap gap-2">
+                        {(availableTags as string[]).map((tag) => (
+                          <Badge 
+                            key={tag}
+                            variant={field.value && Array.isArray(field.value) && field.value.includes(tag) ? "default" : "outline"}
+                            className="cursor-pointer"
+                            onClick={() => {
+                              const currentTags = field.value || [];
+                              // Type guard to ensure currentTags is an array
+                              if (Array.isArray(currentTags)) {
+                                if (currentTags.includes(tag)) {
+                                  field.onChange(currentTags.filter((t) => t !== tag));
+                                } else {
+                                  field.onChange([...currentTags, tag]);
+                                }
+                              } else {
+                                // If field.value isn't an array, initialize a new one with this tag
+                                field.onChange([tag]);
+                              }
+                            }}
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Only refresh documents with selected tags (leave empty for all)
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            
+            <FormField
+              control={form.control}
+              name="isActive"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between space-y-0 rounded-md border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel>Enabled</FormLabel>
+                    <FormDescription>
+                      Turn on/off this scheduled update
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <DialogFooter>
+              <Button type="submit" disabled={mutation.isPending}>
+                {mutation.isPending ? "Saving..." : "Save Schedule"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}

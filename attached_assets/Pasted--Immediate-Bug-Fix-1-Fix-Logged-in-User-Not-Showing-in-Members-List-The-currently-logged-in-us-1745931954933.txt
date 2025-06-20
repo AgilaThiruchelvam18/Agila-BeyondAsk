@@ -1,0 +1,103 @@
+🔧 Immediate Bug Fix
+✅ 1. Fix: Logged-in User Not Showing in Members List
+The currently logged-in user (team owner or member) is not appearing in the team members list view.
+
+Ensure the user who created the team is:
+
+Automatically included as a member (with "Admin" role).
+
+Displayed correctly in the members UI.
+
+Also verify if team members are loaded via a team–user relation or lookup table (e.g., team_members).
+
+📋 Feature Audit — Please Confirm or Implement
+A. ✅ Flexible Role Management
+Confirm if roles are defined in a scalable way (e.g., stored in a roles table or enum).
+
+If not implemented:
+
+Refactor role logic so new roles can be added later without major changes.
+
+B. ✅ Fine-Grained Permissions
+Confirm if permissions are modular and per-feature/module.
+
+If not:
+
+Define a structure for mapping roles to module-level permissions (e.g., "Can Edit Knowledgebase").
+
+C. ✅ Activity Logs (Audit Trail)
+Confirm if the following are being tracked:
+
+Team member invites/removals
+
+KB/Agent edits
+
+If not:
+
+Implement a simple audit log model and create a basic UI (viewable by Admins only).
+
+D. ✅ Pending Invitation Management
+Confirm the following:
+
+Can Admins cancel invites?
+
+Can they see the invite expiration time?
+
+Can they track acceptance or expiry?
+
+If not:
+
+Implement full lifecycle tracking for invitations.
+
+E. ✅ Notifications
+Confirm if the following email notifications are sent:
+
+When a team member joins
+
+When an invite is about to expire
+
+When a user’s role changes
+
+If not:
+
+Implement event-based email triggers for each of these scenarios.
+
+F. ✅ User Profiles
+Confirm if users can:
+
+Update their name, email (with verification), and password
+
+Upload a profile picture
+
+If not:
+
+Create a profile settings page with editable fields and secure update flows.
+
+G. ✅ Multi-Organization Support (Advanced)
+Confirm if a single user can belong to multiple teams with different roles.
+
+If not:
+
+Ensure the DB schema supports many-to-many user–team relationships for future use.
+
+🔒 Security Checklist
+Confirm the following:
+
+Invite tokens are secure (JWT or cryptographically random strings with expiry).
+
+Invite links are protected from brute-force access.
+
+All role and permission checks are enforced server-side (not just hidden in the UI).
+
+🧪 Post-Implementation QA Checklist (Optional but Recommended)
+ Can see the logged-in user in team member list
+
+ Can invite a new user and cancel/resend the invite
+
+ Can see audit log of recent actions
+
+ Role-based permissions enforced on each module
+
+ Email notifications triggered for join/expiry/role changes
+
+ User profile settings page is functional

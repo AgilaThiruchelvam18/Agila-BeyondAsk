@@ -1,0 +1,279 @@
+/**
+ * BeyondAsk Widget - Simple Debug Version
+ */
+(function() {
+  console.log('BeyondAsk Widget: Script loaded');
+  
+  class SimpleWidget {
+    constructor() {
+      this.isOpen = false;
+      this.container = null;
+      this.button = null;
+      this.chatContainer = null;
+    }
+    
+    init() {
+      try {
+        console.log('BeyondAsk Widget: Creating widget elements');
+        
+        // Create widget container
+        this.container = document.createElement('div');
+        this.container.id = 'beyond-widget-container';
+        this.container.style.position = 'fixed';
+        this.container.style.bottom = '20px';
+        this.container.style.right = '20px';
+        this.container.style.zIndex = '999999';
+        
+        // Create button
+        this.button = document.createElement('div');
+        this.button.id = 'beyond-widget-button';
+        this.button.style.width = '60px';
+        this.button.style.height = '60px';
+        this.button.style.borderRadius = '50%';
+        this.button.style.backgroundColor = '#ff0000'; // Bright red for visibility
+        this.button.style.display = 'flex';
+        this.button.style.alignItems = 'center';
+        this.button.style.justifyContent = 'center';
+        this.button.style.cursor = 'pointer';
+        this.button.style.boxShadow = '0 2px 12px rgba(0, 0, 0, 0.2)';
+        this.button.style.color = 'white';
+        this.button.style.fontSize = '24px';
+        
+        // Add message icon
+        this.button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>';
+        
+        // Create chat container (initially hidden)
+        this.chatContainer = document.createElement('div');
+        this.chatContainer.id = 'beyond-chat-container';
+        this.chatContainer.style.position = 'absolute';
+        this.chatContainer.style.bottom = '80px';
+        this.chatContainer.style.right = '0';
+        this.chatContainer.style.width = '350px';
+        this.chatContainer.style.height = '450px';
+        this.chatContainer.style.backgroundColor = '#ffffff';
+        this.chatContainer.style.borderRadius = '10px';
+        this.chatContainer.style.boxShadow = '0 5px 25px rgba(0, 0, 0, 0.2)';
+        this.chatContainer.style.display = 'none';
+        this.chatContainer.style.flexDirection = 'column';
+        this.chatContainer.style.overflow = 'hidden';
+        this.chatContainer.style.transition = 'all 0.3s ease';
+        
+        // Chat header
+        const header = document.createElement('div');
+        header.style.padding = '15px';
+        header.style.backgroundColor = '#ff0000';
+        header.style.color = 'white';
+        header.style.display = 'flex';
+        header.style.justifyContent = 'space-between';
+        header.style.alignItems = 'center';
+        
+        const headerTitle = document.createElement('div');
+        headerTitle.innerHTML = '<h3 style="margin:0;font-size:16px;font-weight:600;">BeyondAsk Widget</h3>';
+        
+        const closeButton = document.createElement('button');
+        closeButton.innerHTML = '&times;';
+        closeButton.style.background = 'none';
+        closeButton.style.border = 'none';
+        closeButton.style.color = 'white';
+        closeButton.style.fontSize = '20px';
+        closeButton.style.cursor = 'pointer';
+        closeButton.style.padding = '0';
+        closeButton.style.width = '24px';
+        closeButton.style.height = '24px';
+        closeButton.style.display = 'flex';
+        closeButton.style.alignItems = 'center';
+        closeButton.style.justifyContent = 'center';
+        
+        header.appendChild(headerTitle);
+        header.appendChild(closeButton);
+        
+        // Chat messages area
+        const messagesContainer = document.createElement('div');
+        messagesContainer.id = 'beyond-chat-messages';
+        messagesContainer.style.flex = '1';
+        messagesContainer.style.overflow = 'auto';
+        messagesContainer.style.padding = '15px';
+        messagesContainer.style.display = 'flex';
+        messagesContainer.style.flexDirection = 'column';
+        
+        // Add welcome message
+        const welcomeMessage = document.createElement('div');
+        welcomeMessage.style.maxWidth = '80%';
+        welcomeMessage.style.padding = '10px 12px';
+        welcomeMessage.style.borderRadius = '12px';
+        welcomeMessage.style.backgroundColor = '#f1f1f1';
+        welcomeMessage.style.marginBottom = '10px';
+        welcomeMessage.style.alignSelf = 'flex-start';
+        welcomeMessage.innerHTML = '<p style="margin:0;">Hello! This is a test of the BeyondAsk widget. How can I help you today?</p>';
+        messagesContainer.appendChild(welcomeMessage);
+        
+        // Input area
+        const inputArea = document.createElement('div');
+        inputArea.style.padding = '10px';
+        inputArea.style.borderTop = '1px solid #e1e1e1';
+        inputArea.style.display = 'flex';
+        inputArea.style.gap = '10px';
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = 'Type your message...';
+        input.style.flex = '1';
+        input.style.padding = '10px';
+        input.style.border = '1px solid #ddd';
+        input.style.borderRadius = '4px';
+        
+        const sendButton = document.createElement('button');
+        sendButton.innerText = 'Send';
+        sendButton.style.padding = '10px 15px';
+        sendButton.style.backgroundColor = '#ff0000';
+        sendButton.style.color = 'white';
+        sendButton.style.border = 'none';
+        sendButton.style.borderRadius = '4px';
+        sendButton.style.cursor = 'pointer';
+        
+        inputArea.appendChild(input);
+        inputArea.appendChild(sendButton);
+        
+        // Assemble chat container
+        this.chatContainer.appendChild(header);
+        this.chatContainer.appendChild(messagesContainer);
+        this.chatContainer.appendChild(inputArea);
+        
+        // Add event listeners
+        this.button.addEventListener('click', () => this.toggleChat());
+        closeButton.addEventListener('click', () => this.toggleChat(false));
+        
+        // Define an array of predefined responses
+        const botResponses = [
+          "Thank you for your message! This is a simulated response from the BeyondAsk widget.",
+          "I'm a test widget for BeyondAsk. In a real implementation, I would connect to the AI backend.",
+          "Thanks for testing the widget! Your message has been received.",
+          "The widget is working correctly. This is just a simulated response.",
+          "In a production environment, this widget would connect to your AI agent and knowledge base."
+        ];
+        
+        sendButton.addEventListener('click', () => {
+          if (input.value.trim()) {
+            this.sendMessage(input.value.trim(), messagesContainer, botResponses);
+            input.value = '';
+          }
+        });
+        
+        input.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter' && input.value.trim()) {
+            this.sendMessage(input.value.trim(), messagesContainer, botResponses);
+            input.value = '';
+            e.preventDefault();
+          }
+        });
+        
+        // Add to container and then to document
+        this.container.appendChild(this.button);
+        this.container.appendChild(this.chatContainer);
+        document.body.appendChild(this.container);
+        
+        console.log('BeyondAsk Widget: Widget elements created and added to DOM', this.container);
+      } catch (err) {
+        console.error('BeyondAsk Widget: Error creating widget elements', err);
+      }
+    }
+    
+    sendMessage(message, messagesContainer, botResponses) {
+      console.log('BeyondAsk Widget: Sending message:', message);
+      
+      // Create user message element
+      const userMessage = document.createElement('div');
+      userMessage.style.maxWidth = '80%';
+      userMessage.style.padding = '10px 12px';
+      userMessage.style.borderRadius = '12px';
+      userMessage.style.backgroundColor = '#ff0000';
+      userMessage.style.color = 'white';
+      userMessage.style.marginBottom = '10px';
+      userMessage.style.marginLeft = 'auto'; // Right align
+      userMessage.style.alignSelf = 'flex-end';
+      userMessage.innerHTML = `<p style="margin:0;">${this.escapeHtml(message)}</p>`;
+      messagesContainer.appendChild(userMessage);
+      
+      // Scroll to bottom
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      
+      // Show typing indicator
+      const typingIndicator = document.createElement('div');
+      typingIndicator.style.maxWidth = '80%';
+      typingIndicator.style.padding = '10px 12px';
+      typingIndicator.style.borderRadius = '12px';
+      typingIndicator.style.backgroundColor = '#f1f1f1';
+      typingIndicator.style.marginBottom = '10px';
+      typingIndicator.style.alignSelf = 'flex-start';
+      typingIndicator.innerHTML = '<div style="display:flex;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background-color:#999;animation:typing 1s infinite"></div><div style="width:8px;height:8px;border-radius:50%;background-color:#999;animation:typing 1s infinite 0.2s"></div><div style="width:8px;height:8px;border-radius:50%;background-color:#999;animation:typing 1s infinite 0.4s"></div></div>';
+      messagesContainer.appendChild(typingIndicator);
+      
+      // Add animation style
+      if (!document.getElementById('typing-animation-style')) {
+        const style = document.createElement('style');
+        style.id = 'typing-animation-style';
+        style.innerHTML = `
+          @keyframes typing {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+      
+      // Scroll to bottom again
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      
+      // Simulate response after a delay
+      setTimeout(() => {
+        // Remove typing indicator
+        messagesContainer.removeChild(typingIndicator);
+        
+        // Get a random response
+        const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
+        
+        // Create bot message
+        const botMessage = document.createElement('div');
+        botMessage.style.maxWidth = '80%';
+        botMessage.style.padding = '10px 12px';
+        botMessage.style.borderRadius = '12px';
+        botMessage.style.backgroundColor = '#f1f1f1';
+        botMessage.style.marginBottom = '10px';
+        botMessage.style.alignSelf = 'flex-start';
+        botMessage.innerHTML = `<p style="margin:0;">${randomResponse}</p>`;
+        messagesContainer.appendChild(botMessage);
+        
+        // Scroll to bottom again
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }, 1500);
+    }
+    
+    toggleChat(open = null) {
+      this.isOpen = open !== null ? open : !this.isOpen;
+      
+      if (this.isOpen) {
+        this.chatContainer.style.display = 'flex';
+      } else {
+        this.chatContainer.style.display = 'none';
+      }
+    }
+    
+    escapeHtml(html) {
+      const div = document.createElement('div');
+      div.textContent = html;
+      return div.innerHTML;
+    }
+  }
+  
+  // Initialize widget
+  setTimeout(() => {
+    const widget = new SimpleWidget();
+    widget.init();
+    
+    // Expose globally
+    window.beyondWidget = function(command, options) {
+      console.log('BeyondWidget called with:', command, options);
+      return widget;
+    };
+  }, 500);
+})();

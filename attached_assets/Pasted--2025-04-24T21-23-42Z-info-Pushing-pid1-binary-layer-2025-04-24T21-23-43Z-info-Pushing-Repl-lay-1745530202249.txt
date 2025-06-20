@@ -1,0 +1,33 @@
+
+2025-04-24T21:23:42Z info: Pushing pid1 binary layer...
+2025-04-24T21:23:43Z info: Pushing Repl layer...
+2025-04-24T21:23:43Z info: Pushing hosting layer...
+2025-04-24T21:23:43Z info: Retrieved cached nix layer
+2025-04-24T21:23:43Z info: Created hosting layer
+2025-04-24T21:23:44Z info: Created pid1 binary layer
+2025-04-24T21:24:17Z info: Pushing Repl (cache) layer...
+2025-04-24T21:24:18Z info: Created Repl (cache) layer
+2025-04-24T21:24:18Z info: Pushed image manifest
+2025-04-24T21:24:19Z info: Pushed soci index manifest
+2025-04-24T21:24:22Z info: Creating Autoscale service
+Checking for required system utilities...
+file:///home/runner/workspace/temp-port-server.js:1
+Attempting to release port 5000...
+🧹 Cleaning dist directory...
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+dist/public/index.html                           1.66 kB │ gzip:   0.67 kB
+dist/public/assets/mathematica-DTrFuWx2.js       1.92 kB │ gzip:   0.81 kB
+dist/public/assets/sieve-C3Gn_uJK.js             1.62 kB │ gzip:   0.77 kB
+dist/public/assets/properties-C78fOPTZ.js        0.67 kB │ gzip:   0.34 kB
+dist/public/assets/eiffel-CnydiIhH.js            1.81 kB │ gzip:   0.91 kB
+dist/public/assets/q-ZnEupP5q.js                 3.99 kB │ gzip:   1.64 kB
+✅ Server build completed successfully
+📦 To start the production server, run:
+dist/public/assets/index-8J0VYuJk.js            70.77 kB │ gzip:  25.06 kB
+🔧 Building server with esbuild...
+Starting server...
+Using PostgreSQL for storage!
+9:26:20 PM [postgresql] Connected to PostgreSQL database
+healthcheck ping failed
+2025-04-24T21:27:50Z error: The deployment is failing health checks. This can happen if the application isn't responding, responds with an error, or doesn't respond in time. Health checks are sent to the / endpoint by default and must respond as soon as possible. Make sure that the / endpoint is implemented and returns a 200 status code in a timely manner. Avoid doing expensive or long running operations on the / endpoint, prefer deferring them to a different route. Check the logs for more information.

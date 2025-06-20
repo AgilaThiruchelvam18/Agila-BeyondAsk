@@ -1,0 +1,81 @@
+Task Prompt: Implement Usage Metrics Dashboard (BeyondAsk)
+Task:
+Build a Usage Metrics section in the main BeyondAsk dashboard to visually display important statistics and analytics about the platform’s usage.
+
+📋 Detailed Requirements:
+1. Core Metrics to Display
+Add real-time counters/widgets for the following:
+
+📄 Number of Words Used
+
+Total words processed by the AI agents (this month and lifetime).
+
+🔥 Number of API Requests
+
+Total API requests made (this month and lifetime).
+
+💾 Storage Utilization
+
+Space used for knowledgebase articles, uploaded files, media.
+
+Show usage in MB/GB with a % progress bar (optional).
+
+❓ Overall Questions/Month
+
+Total user questions (interactions via chat widgets) this month.
+
+🧑‍💻 Number of Contacts Collected
+
+Total contacts captured through widgets (this month and lifetime).
+
+🌍 Users by Region
+
+Breakdown of users/contacts by country or region (top 5-10 regions).
+
+2. Charts and Visualizations
+Integrate charts for better visual representation:
+
+
+Chart Type	What to Display
+Line Chart	Growth in questions, API requests over time (weekly/monthly view)
+Bar Chart	Top 5 countries by number of users
+Pie/Donut Chart	% distribution of storage utilization types (text, media, other)
+Area Chart	Word usage growth over time
+Suggest using lightweight chart libraries like Chart.js, Recharts, or ApexCharts.
+
+3. Design and Layout
+Integrate the metrics and charts into the existing main dashboard page.
+
+Follow the same sidebar, topbar, and card design used throughout BeyondAsk.
+
+Group widgets cleanly (e.g., "Usage Summary" section, "Storage" section, "Contacts" section).
+
+4. Backend/API Changes
+Build necessary backend endpoints to fetch:
+
+Monthly usage stats (words, API requests, questions).
+
+Storage stats.
+
+Contacts and user geographic stats.
+
+Secure API endpoints to avoid unauthorized access to usage data.
+
+5. Update Frequency
+Usage stats should update:
+
+Ideally live (or refresh every few minutes)
+
+Or allow manual refresh button on dashboard if needed.
+
+🚀 Stretch Goals (Optional)
+Allow users to set monthly usage limits and send alerts/notifications when close to limits.
+
+Implement a CSV export of usage data (for admins).
+
+Show daily breakdown (optional drilldown into days if user clicks on a chart).
+
+🔒 Security Notes
+Ensure only authenticated users/admins can view detailed usage metrics.
+
+Avoid exposing any sensitive data in API responses.

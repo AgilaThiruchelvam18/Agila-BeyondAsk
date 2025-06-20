@@ -1,0 +1,2 @@
+7:04:41 PM [postgresql] Connected to PostgreSQL database
+Using PostgreSQL for storage

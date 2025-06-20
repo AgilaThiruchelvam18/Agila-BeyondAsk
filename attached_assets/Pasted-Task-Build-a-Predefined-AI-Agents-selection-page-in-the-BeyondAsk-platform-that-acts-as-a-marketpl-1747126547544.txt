@@ -1,0 +1,77 @@
+Task
+Build a “Predefined AI Agents” selection page in the BeyondAsk platform that acts as a marketplace or gallery. It should allow users to:
+
+Browse available predefined agents
+
+View a summary of each agent’s purpose and behavior
+
+Select an agent to use or customize
+
+Create a copy of the predefined agent under their workspace (with optional name edit)
+
+(Optionally) filter or search by role, category, or tags
+
+🖼️ Page Features
+Feature	Description
+Agent Cards	Display each predefined agent in a card format
+Agent Info	Show: name, short description, key behaviors (rules preview), and avatar/icon
+View Details	Option to open a modal or page with full agent config preview
+“Use This Agent” Button	Copies the agent to the user’s workspace (without knowledge base)
+Search/Filter	(Optional) Let users search by name or filter by use case (e.g., Ads, Email, Sales)
+Tagging (Optional)	Tag agents like “Marketing”, “Writing”, “Sales”, etc.
+
+🧱 Suggested Data Model
+Use the existing agent schema, with the addition of optional metadata fields:
+
+json
+Copy
+Edit
+{
+  "id": "facebook_ad_maker",
+  "name": "Facebook Ad Maker",
+  "description": "Generates short, benefit-focused Facebook ads tailored for SaaS products.",
+  "promptTemplate": "...",
+  "rules": ["..."],
+  "confidenceThreshold": 0.8,
+  "fallbackMessage": "...",
+  "knowledgeBaseIds": [],
+  "allowContinuousGeneration": false,
+  "enableConversationMemory": false,
+  "isPredefined": true,
+  "tags": ["Marketing", "Ads"],
+  "icon": "📣"  // Optional emoji or asset reference
+}
+🧠 User Flow
+User opens "Explore AI Agents" from the dashboard or sidebar.
+
+Predefined agents are displayed as cards in a grid or list.
+
+User clicks “Use This Agent” on a card.
+
+A modal lets them:
+
+Review the full prompt and rules
+
+Optionally rename the agent
+
+On confirm:
+
+A copy of the predefined agent is created under the user’s workspace
+
+knowledgeBaseIds remains empty for user to configure later
+
+🧑‍🎨 Interface Design Notes
+Style should match your existing UI (professional, user-friendly, dark mode compatible)
+
+Reuse your agent creation components if possible for the preview/edit modal
+
+If you want inspiration:
+
+Think “Notion template gallery” or “Zapier automation starter list”
+
+🔐 Permissions
+Users cannot edit predefined agents directly
+
+They only create a copy for customization
+
+Optional: Admin-only toggle to manage predefined agents

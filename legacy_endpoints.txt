@@ -1,0 +1,23 @@
+# Knowledge Base Management
+GET /api/knowledge-bases
+GET /api/knowledge-bases/:id
+POST /api/knowledge-bases
+PUT /api/knowledge-bases/:id
+DELETE /api/knowledge-bases/:id
+
+# Document Management
+GET /api/knowledge-bases/:kbId/documents
+PUT /api/knowledge-bases/:kbId/documents/:docId
+GET /api/knowledge-bases/:kbId/documents/export
+POST /api/knowledge-bases/:kbId/documents/import
+
+# Document Upload & Processing
+POST /api/knowledge-bases/:kbId/documents
+POST /api/knowledge-bases/:kbId/documents/upload
+POST /api/knowledge-bases/:kbId/documents/upload-multiple
+POST /api/knowledge-bases/:kbId/documents/:docId/process
+POST /api/knowledge-bases/:kbId/documents/:docId/reprocess-embeddings
+
+# Document Content Sources
+POST /api/knowledge-bases/:kbId/documents/youtube
+POST /api/knowledge-bases/:kbId/documents/sharepoint

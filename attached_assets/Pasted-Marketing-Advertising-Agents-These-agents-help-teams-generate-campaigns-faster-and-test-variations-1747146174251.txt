@@ -1,0 +1,62 @@
+Marketing & Advertising Agents
+These agents help teams generate campaigns faster and test variations at scale.
+
+Agent Name	Purpose
+Facebook Ad Maker	Writes short, high-converting Facebook ads tailored for product or service promotions
+Google Ads Generator	Generates search ad headlines and descriptions with keyword targeting
+Landing Page Copywriter	Creates persuasive landing page content using AIDA or PAS framework
+SEO Blog Generator	Writes SEO-optimized blog posts with structured keywords and headings
+Product Description Writer	Generates product descriptions for e-commerce platforms like Shopify or Amazon
+
+✉️ Sales & Email Agents
+These boost outreach efficiency for B2B and SaaS companies.
+
+Agent Name	Purpose
+Cold Email Generator	Crafts concise, personalized outreach emails based on recipient persona
+Follow-Up Email Writer	Generates polite follow-up messages with urgency and context
+Sales Pitch Assistant	Creates short pitches for demos, meetings, or LinkedIn messages
+Proposal Summary Writer	Summarizes proposals or product offerings in easy-to-share format
+
+📝 Content Creation & Writing Agents
+Popular with creators, educators, and marketers.
+
+Agent Name	Purpose
+Blog Post Outliner	Generates topic outlines and blog structures
+Newsletter Assistant	Creates formatted newsletter content with sections and CTA
+YouTube Script Writer	Writes intros, hooks, and scripts for video creators
+LinkedIn Post Generator	Crafts thought-leadership posts for engagement and visibility
+Press Release Writer	Helps companies announce product launches or news
+
+🧠 Knowledge & Documentation Agents
+Useful for internal team productivity and customer-facing docs.
+
+Agent Name	Purpose
+Help Article Generator	Writes support or how-to articles for knowledge bases
+Policy Document Drafter	Generates HR or IT policy templates with placeholders
+Technical Doc Explainer	Simplifies technical documents into plain language summaries
+User Guide Builder	Converts features into step-by-step instructions
+
+👨‍💼 Business & Productivity Agents
+Support internal operations, strategic planning, and analysis.
+
+Agent Name	Purpose
+Meeting Summary Generator	Transforms transcripts into summaries with action items
+Business Plan Writer	Drafts lean business plans with executive summaries
+SWOT Analyzer	Creates SWOT analysis from bullet input or business overview
+Pitch Deck Copy Assistant	Suggests slide text for investor or sales decks
+
+📊 Data & Analytics Agents
+Great for product managers, analysts, and operations teams.
+
+Agent Name	Purpose
+Survey Insights Summarizer	Extracts trends and highlights from customer feedback
+Customer Review Analyzer	Summarizes positive/negative themes from review data
+KPI Report Writer	Converts raw numbers into narrative reports for stakeholders
+
+🎨 Design Prompt Helpers
+These agents work with creative tools or generate structured input for them.
+
+Agent Name	Purpose
+Midjourney Prompt Creator	Crafts visual prompt descriptions for AI image tools
+UX Copy Generator	Suggests microcopy for buttons, tooltips, and modals
+Slogan & Tagline Generator	Creates brand slogans or taglines based on mission/values

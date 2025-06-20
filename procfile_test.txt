@@ -1,0 +1,10 @@
+Starting BeyondAsk production launcher...
+Environment: development
+PORT: 3458
+Working Directory: /home/runner/workspace
+Starting server in production mode...
+Found server at: ./dist/index.js
+Launching server with: /nix/store/wfxq6w9bkp5dcfr8yb6789b0w7128gnb-nodejs-20.18.1/bin/node --experimental-specifier-resolution=node --experimental-modules ./dist/index.js
+6:44:10 PM [postgresql] Connected to PostgreSQL database
+Using PostgreSQL for storage
+SIGTERM received, forwarding to server process
